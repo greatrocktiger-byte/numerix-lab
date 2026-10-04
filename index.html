@@ -1,0 +1,2000 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+  <title>NUMERIX LAB — Numerical Methods, Visualized</title>
+  
+  <!-- Google Fonts & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            surface: "#0e1321",
+            "surface-dim": "#090e1c",
+            "surface-low": "#161b2a",
+            "surface-card": "#1a1f2e",
+            "surface-high": "#252a39",
+            "surface-highest": "#303444",
+            "on-surface": "#dee2f6",
+            "on-surface-variant": "#94a3b8",
+            primary: "#00f0ff",
+            "primary-container": "#00f0ff",
+            "on-primary-container": "#00363a",
+            secondary: "#3b82f6",
+            "secondary-container": "#0566d9",
+            "tertiary-hot": "#ff5722",
+            "tertiary-amber": "#ff9800",
+            "kinetic-green": "#10b981",
+            outline: "#849495"
+          },
+          fontFamily: {
+            heading: ["Space Grotesk", "sans-serif"],
+            body: ["Inter", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    };
+  </script>
+  
+  <link rel="stylesheet" href="src/styles.css"/>
+</head>
+<body class="bg-surface text-on-surface font-body min-h-screen flex flex-col select-none antialiased">
+
+  <!-- TOP CYBERNETIC NAVIGATION BAR -->
+  <header class="sticky top-0 z-50 w-full bg-surface-dim/85 backdrop-blur-xl border-b border-white/10 px-4 lg:px-8 py-3 flex items-center justify-between shadow-2xl">
+    <!-- Brand -->
+    <div class="flex items-center gap-3 cursor-pointer" onclick="app.navigate('thermalx-home')">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-container/20 to-secondary-container/40 border border-primary/40 flex items-center justify-center shadow-lg shadow-primary/10">
+        <span class="material-symbols-outlined text-primary text-[24px]">science</span>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="font-heading font-extrabold text-lg text-white tracking-wider">NUMERIX LAB</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-primary/10 text-primary border border-primary/30">v2.4 PRO</span>
+        </div>
+        <p class="text-xs text-on-surface-variant tracking-wider uppercase font-mono">Numerical Methods, Visualized</p>
+      </div>
+    </div>
+
+    <!-- Flagship Modules Switcher -->
+    <nav class="flex items-center gap-1 bg-surface-low p-1 rounded-xl border border-white/10">
+      <button class="nav-module-btn px-4 py-2 rounded-lg text-xs font-heading font-semibold flex items-center gap-2 transition-all text-primary border-b-2 border-primary" data-module="thermalx">
+        <span class="material-symbols-outlined text-[18px]">local_fire_department</span>
+        <span>THERMALX</span>
+      </button>
+      <button class="nav-module-btn px-4 py-2 rounded-lg text-xs font-heading font-semibold flex items-center gap-2 transition-all text-on-surface-variant hover:text-white" data-module="linkrank">
+        <span class="material-symbols-outlined text-[18px]">hub</span>
+        <span>LINKRANK</span>
+      </button>
+      <button class="nav-module-btn px-4 py-2 rounded-lg text-xs font-heading font-semibold flex items-center gap-2 transition-all text-on-surface-variant hover:text-white" data-module="academic">
+        <span class="material-symbols-outlined text-[18px]">calculate</span>
+        <span>NUMERICAL LAB</span>
+      </button>
+    </nav>
+
+    <!-- Right Controls -->
+    <div class="flex items-center gap-3">
+      <div class="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-surface-high/60 border border-white/5 text-[11px] font-mono text-emerald-400">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+        <span>ENGINE READY · 60 FPS</span>
+      </div>
+      <button onclick="document.getElementById('thermalMathModal').classList.remove('hidden')" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-low border border-white/10 hover:border-primary/40 text-xs font-mono text-white transition-colors">
+        <span class="material-symbols-outlined text-[16px] text-primary">layers</span>
+        <span>Show Math</span>
+      </button>
+      <button onclick="app.generateSimulationReport()" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-950/40 border border-emerald-500/30 hover:border-emerald-400 text-xs font-mono text-emerald-300 transition-colors">
+        <span class="material-symbols-outlined text-[16px]">description</span>
+        <span>Lab Report</span>
+      </button>
+      <button id="soundToggleBtn" title="Toggle Sound Feedback" class="w-9 h-9 rounded-lg bg-surface-low border border-white/10 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+        <span class="material-symbols-outlined text-[20px]">volume_up</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- UNIVERSAL BREADCRUMB & NAVIGATION BAR (Allows jumping back/home from any screen) -->
+  <div id="globalBreadcrumbBar" class="sticky top-[61px] z-40 w-full bg-surface-low/90 backdrop-blur-md border-b border-white/5 px-4 lg:px-8 py-2.5 flex items-center justify-between select-none shadow-sm">
+    <div class="flex items-center gap-3">
+      <button id="globalBackBtn" onclick="app.goBack()" class="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-surface-card border border-white/10 hover:border-primary/50 text-xs font-mono text-white transition-all shadow-sm">
+        <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+        <span>BACK</span>
+      </button>
+      <div id="globalBreadcrumbs" class="flex items-center gap-2 text-xs font-mono overflow-x-auto whitespace-nowrap">
+        <!-- Dynamically updated by app.updateBreadcrumbs() -->
+      </div>
+    </div>
+
+    <!-- Quick Navigation Hub -->
+    <div class="hidden sm:flex items-center gap-1.5 text-xs font-mono">
+      <span class="text-on-surface-variant text-[11px] uppercase mr-1">Modules:</span>
+      <button onclick="app.navigate('thermalx-home')" class="px-2.5 py-1 rounded-md bg-surface-card hover:bg-surface-high border border-white/5 text-white flex items-center gap-1 transition-colors">
+        <span class="material-symbols-outlined text-[14px] text-tertiary-hot">local_fire_department</span>
+        <span>ThermalX</span>
+      </button>
+      <button onclick="app.navigate('linkrank-home')" class="px-2.5 py-1 rounded-md bg-surface-card hover:bg-surface-high border border-white/5 text-white flex items-center gap-1 transition-colors">
+        <span class="material-symbols-outlined text-[14px] text-primary">hub</span>
+        <span>LinkRank</span>
+      </button>
+      <button onclick="app.navigate('academic-hub')" class="px-2.5 py-1 rounded-md bg-surface-card hover:bg-surface-high border border-white/5 text-white flex items-center gap-1 transition-colors">
+        <span class="material-symbols-outlined text-[14px] text-emerald-400">calculate</span>
+        <span>Numerical Lab</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN VIEWPORT CONTAINER -->
+  <main class="flex-1 w-full max-w-7xl mx-auto p-4 lg:p-8 relative">
+
+    <!-- ========================================================= -->
+    <!-- [1] THERMALX MODULE SCREENS -->
+    <!-- ========================================================= -->
+
+    <!-- 1.1 THERMALX HOME SCREEN -->
+    <section id="thermalx-home" class="tab-screen active">
+      <div class="flex flex-col gap-10">
+        <!-- Hero Stage Card (Elevated Design Beating The Other AI) -->
+        <div class="relative w-full rounded-3xl bg-surface-dim border border-white/10 p-6 sm:p-10 lg:p-12 overflow-hidden shadow-2xl flex flex-col items-center text-center">
+          <!-- Dynamic Ambient Background Glows -->
+          <div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[350px] rounded-full bg-gradient-to-r from-red-600/15 via-amber-500/20 to-cyan-500/10 blur-3xl pointer-events-none"></div>
+
+          <!-- Top Badge Pill (Matching User Screenshot) -->
+          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface-card border border-amber-500/40 text-xs font-mono text-amber-300 shadow-lg relative z-10 mb-4">
+            <span class="material-symbols-outlined text-[16px] text-tertiary-hot animate-pulse">local_fire_department</span>
+            <span class="tracking-wider uppercase font-semibold">Interactive Thermal Field Simulator</span>
+          </div>
+
+          <!-- Massive Burning Title (Matching User Screenshot) -->
+          <h1 class="thermal-text-glow font-heading font-black text-5xl sm:text-6xl lg:text-7xl tracking-wider relative z-10 leading-none">
+            THERMALX
+          </h1>
+
+          <!-- Tagline -->
+          <p class="font-heading font-bold text-sm sm:text-base text-primary tracking-[0.25em] uppercase relative z-10 mt-3">
+            VISUALIZE &bull; SIMULATE &bull; OPTIMIZE
+          </p>
+
+          <!-- Core Value Proposition Text -->
+          <p class="text-sm sm:text-base text-on-surface-variant max-w-2xl mx-auto leading-relaxed relative z-10 mt-3">
+            See how heat moves. Understand the science of discrete Laplacians. Solve real-world cooling problems with verified Gauss-Seidel numerical methods.
+          </p>
+
+          <!-- Centered Action CTA Button -->
+          <div class="relative z-10 mt-6 flex flex-wrap items-center justify-center gap-4">
+            <button onclick="app.navigate('thermalx-select')" class="px-8 py-4 rounded-xl bg-gradient-to-r from-secondary-container via-blue-600 to-primary hover:from-blue-600 hover:to-cyan-300 text-white font-heading font-bold text-base flex items-center gap-2.5 shadow-2xl shadow-blue-500/35 active:scale-95 transition-all">
+              <span>Get Started</span>
+              <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+            </button>
+            <button onclick="app.navigate('thermalx-challenge')" class="px-6 py-4 rounded-xl bg-surface-card border border-white/10 hover:border-amber-500/50 text-white font-heading font-semibold text-sm flex items-center gap-2 transition-all">
+              <span class="material-symbols-outlined text-[20px] text-tertiary-amber">emoji_events</span>
+              <span>Challenges</span>
+            </button>
+          </div>
+
+          <!-- Real-Time Laptop Screen Stage Graphic (Matching & Elevating User Screenshot) -->
+          <div class="relative w-full max-w-3xl mt-10 rounded-2xl bg-surface-card/80 border-2 border-white/10 p-4 sm:p-6 shadow-2xl overflow-hidden group cursor-pointer" onclick="app.navigate('thermalx-select')">
+            <!-- Inner Screen Chassis Bezel -->
+            <div class="relative w-full rounded-xl bg-[#080d1a] border border-white/10 p-5 sm:p-7 flex flex-col gap-6 overflow-hidden">
+              <!-- Top Bezel Telemetry -->
+              <div class="flex items-center justify-between relative z-10">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/70 border border-emerald-500/40 text-xs font-mono text-emerald-400">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                  <span>&nabla;&sup2;T = 0 &bull; Laplace Solver Ready</span>
+                </div>
+                <span class="text-[11px] font-mono text-cyan-300/80">DISCRETE LAPLACIAN MESH</span>
+              </div>
+
+              <!-- Side-by-Side Radiant Silicon Die Cards (CPU & GPU) -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-10 py-3">
+                <!-- CPU DIE Card -->
+                <div class="silicon-card-cpu rounded-2xl p-6 flex flex-col items-center justify-center gap-2 text-center transition-all hover:scale-102">
+                  <span class="text-xs font-mono uppercase tracking-wider text-red-400 font-bold">CPU DIE</span>
+                  <div class="font-heading font-black text-4xl sm:text-5xl text-white tracking-tight">85°C</div>
+                  <div class="flex items-center gap-1.5 text-xs font-mono text-red-300/90 mt-1">
+                    <span class="material-symbols-outlined text-[16px] text-red-400 animate-pulse">ecg_heart</span>
+                    <span>High Dissipation</span>
+                  </div>
+                </div>
+
+                <!-- GPU DIE Card -->
+                <div class="silicon-card-gpu rounded-2xl p-6 flex flex-col items-center justify-center gap-2 text-center transition-all hover:scale-102">
+                  <span class="text-xs font-mono uppercase tracking-wider text-amber-400 font-bold">GPU DIE</span>
+                  <div class="font-heading font-black text-4xl sm:text-5xl text-white tracking-tight">75°C</div>
+                  <div class="flex items-center gap-1.5 text-xs font-mono text-amber-300/90 mt-1">
+                    <span class="material-symbols-outlined text-[16px] text-amber-400">bolt</span>
+                    <span>Active Load</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Thermal Waves Vector Overlay -->
+              <svg class="absolute inset-0 w-full h-full pointer-events-none opacity-25" viewBox="0 0 600 220" fill="none">
+                <path d="M -50,150 Q 150,70 300,130 T 650,90" stroke="#ff3b19" stroke-width="2.5" stroke-dasharray="5 5"/>
+                <path d="M -50,180 Q 180,100 350,160 T 650,120" stroke="#00f0ff" stroke-width="2"/>
+              </svg>
+            </div>
+
+            <!-- Laptop Base Chin Notch -->
+            <div class="w-full mt-3 flex items-center justify-center">
+              <div class="w-36 h-2 rounded-full bg-white/10 flex items-center justify-center">
+                <div class="w-12 h-1 rounded-full bg-white/25"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Quick Simulation & Viva Suite Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <!-- Card 1: Laptop Simulation -->
+          <div onclick="app.navigate('thermalx-config')" class="rounded-xl bg-surface-card border border-white/10 hover:border-primary/50 p-6 flex flex-col justify-between cursor-pointer group transition-all hover:-translate-y-1 shadow-xl">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-secondary group-hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-[28px]">laptop_mac</span>
+              </div>
+              <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary group-hover:translate-x-1 transition-all">arrow_forward</span>
+            </div>
+            <div>
+              <h3 class="font-heading font-bold text-lg text-white mb-1">Laptop Simulation</h3>
+              <p class="text-xs text-on-surface-variant leading-relaxed">
+                Configure ambient temperature, CPU, GPU, battery heat sources, and cooling convection.
+              </p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] font-mono text-primary">
+              <span>PRE-BUILT MODEL</span>
+              <span>Gauss-Seidel / Jacobi</span>
+            </div>
+          </div>
+
+          <!-- Card 2: Custom Grid -->
+          <div onclick="app.navigate('thermalx-custom')" class="rounded-xl bg-surface-card border border-white/10 hover:border-primary/50 p-6 flex flex-col justify-between cursor-pointer group transition-all hover:-translate-y-1 shadow-xl">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                <span class="material-symbols-outlined text-[28px]">grid_view</span>
+              </div>
+              <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary group-hover:translate-x-1 transition-all">arrow_forward</span>
+            </div>
+            <div>
+              <h3 class="font-heading font-bold text-lg text-white mb-1">Custom Grid Designer</h3>
+              <p class="text-xs text-on-surface-variant leading-relaxed">
+                Design your own thermal matrix. Paint heat sources, cooling sinks, and zero-flux insulators.
+              </p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] font-mono text-cyan-300">
+              <span>16x16 MATRIX</span>
+              <span>Interactive CAD</span>
+            </div>
+          </div>
+
+          <!-- Card 3: Challenges -->
+          <div onclick="app.navigate('thermalx-challenge')" class="rounded-xl bg-surface-card border border-white/10 hover:border-primary/50 p-6 flex flex-col justify-between cursor-pointer group transition-all hover:-translate-y-1 shadow-xl">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-tertiary-amber group-hover:rotate-12 transition-transform">
+                <span class="material-symbols-outlined text-[28px]">trophy</span>
+              </div>
+              <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary group-hover:translate-x-1 transition-all">arrow_forward</span>
+            </div>
+            <div>
+              <h3 class="font-heading font-bold text-lg text-white mb-1">Thermal Challenges</h3>
+              <p class="text-xs text-on-surface-variant leading-relaxed">
+                Stabilize overheated systems below 75°C using Bisection optimization and fan control.
+              </p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] font-mono text-amber-400">
+              <span>3 SCENARIOS</span>
+              <span>Scored Missions</span>
+            </div>
+          </div>
+
+          <!-- Card 4: Numerical Lab (Viva Suite) -->
+          <div onclick="app.navigate('academic-hub')" class="rounded-xl bg-surface-card border border-white/10 hover:border-emerald-500/50 p-6 flex flex-col justify-between cursor-pointer group transition-all hover:-translate-y-1 shadow-xl">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                <span class="material-symbols-outlined text-[28px]">calculate</span>
+              </div>
+              <span class="material-symbols-outlined text-on-surface-variant group-hover:text-emerald-400 group-hover:translate-x-1 transition-all">arrow_forward</span>
+            </div>
+            <div>
+              <h3 class="font-heading font-bold text-lg text-white mb-1">Numerical Viva Lab</h3>
+              <p class="text-xs text-on-surface-variant leading-relaxed">
+                Interactive step-by-step solvers for Jacobi, Gauss-Seidel, Bisection, Newton-Raphson & Power Method.
+              </p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] font-mono text-emerald-400">
+              <span>4 ALGORITHMS</span>
+              <span>Animated Steps</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1.2 THERMALX MODE SELECTION SCREEN -->
+    <section id="thermalx-select" class="tab-screen">
+      <div class="max-w-2xl mx-auto flex flex-col gap-6">
+        <div class="flex items-center justify-between">
+          <button onclick="app.navigate('thermalx-home')" class="flex items-center gap-1.5 text-xs font-mono text-on-surface-variant hover:text-white transition-colors">
+            <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+            <span>BACK TO HOME</span>
+          </button>
+          <span class="text-xs font-mono text-primary uppercase">Step 1 of 3</span>
+        </div>
+
+        <div class="text-center">
+          <h2 class="font-heading font-bold text-2xl sm:text-3xl text-white">Choose a Simulation Mode</h2>
+          <p class="text-sm text-on-surface-variant mt-1">Select the thermodynamic environment you wish to simulate.</p>
+        </div>
+
+        <div class="flex flex-col gap-4 mt-2">
+          <!-- Option 1: Laptop -->
+          <div onclick="app.navigate('thermalx-config')" class="p-5 rounded-2xl bg-surface-card border-2 border-primary/60 hover:border-primary flex items-center justify-between cursor-pointer transition-all shadow-xl group">
+            <div class="flex items-center gap-4">
+              <div class="w-14 h-14 rounded-xl bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined text-[32px]">laptop</span>
+              </div>
+              <div>
+                <h3 class="font-heading font-bold text-lg text-white group-hover:text-primary transition-colors">Laptop Simulation</h3>
+                <p class="text-xs text-on-surface-variant">Pre-built realistic motherboard architecture with CPU, GPU, and exhaust sinks.</p>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform">arrow_forward</span>
+          </div>
+
+          <!-- Option 2: Custom Grid -->
+          <div onclick="app.navigate('thermalx-custom')" class="p-5 rounded-2xl bg-surface-card border border-white/10 hover:border-primary/50 flex items-center justify-between cursor-pointer transition-all shadow-xl group">
+            <div class="flex items-center gap-4">
+              <div class="w-14 h-14 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-300">
+                <span class="material-symbols-outlined text-[32px]">grid_view</span>
+              </div>
+              <div>
+                <h3 class="font-heading font-bold text-lg text-white group-hover:text-primary transition-colors">Custom Grid</h3>
+                <p class="text-xs text-on-surface-variant">Build and paint your own computational mesh from scratch.</p>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform">arrow_forward</span>
+          </div>
+
+          <!-- Option 3: Challenges -->
+          <div onclick="app.navigate('thermalx-challenge')" class="p-5 rounded-2xl bg-surface-card border border-white/10 hover:border-primary/50 flex items-center justify-between cursor-pointer transition-all shadow-xl group">
+            <div class="flex items-center gap-4">
+              <div class="w-14 h-14 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-tertiary-amber">
+                <span class="material-symbols-outlined text-[32px]">emoji_events</span>
+              </div>
+              <div>
+                <h3 class="font-heading font-bold text-lg text-white group-hover:text-primary transition-colors">Challenges</h3>
+                <p class="text-xs text-on-surface-variant">Test your cooling optimization skills against target thermal limits.</p>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform">arrow_forward</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1.3 THERMALX LAPTOP CONFIGURATION SCREEN -->
+    <section id="thermalx-config" class="tab-screen">
+      <div class="max-w-3xl mx-auto flex flex-col gap-6">
+        <div class="flex items-center justify-between">
+          <button onclick="app.navigate('thermalx-select')" class="flex items-center gap-1.5 text-xs font-mono text-on-surface-variant hover:text-white transition-colors">
+            <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+            <span>BACK TO MODES</span>
+          </button>
+          <div class="text-xs font-mono text-primary">LAPTOP SIMULATION &gt; CONFIGURE</div>
+        </div>
+
+        <div class="bg-surface-card border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl flex flex-col gap-6">
+          <div>
+            <h2 class="font-heading font-bold text-2xl text-white">Configure Your Thermal System</h2>
+            <p class="text-xs text-on-surface-variant mt-1">Adjust parameters to simulate heat dissipation across the motherboard chassis.</p>
+          </div>
+
+          <!-- Parameter Sliders -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Ambient Temp -->
+            <div class="flex flex-col gap-2 p-4 rounded-xl bg-surface-dim border border-white/5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-mono text-on-surface-variant">Ambient Temperature</span>
+                <span id="ambientVal" class="text-sm font-mono font-bold text-white">25°C</span>
+              </div>
+              <input type="range" id="ambientSlider" min="15" max="40" step="1" value="25"/>
+              <div class="flex justify-between text-[10px] font-mono text-on-surface-variant">
+                <span>15°C (Cold Room)</span>
+                <span>40°C (Hot Desert)</span>
+              </div>
+            </div>
+
+            <!-- CPU Temp -->
+            <div class="flex flex-col gap-2 p-4 rounded-xl bg-surface-dim border border-white/5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-mono text-tertiary-hot flex items-center gap-1">
+                  <span class="w-2 h-2 rounded-full bg-tertiary-hot"></span>
+                  CPU Die Temperature
+                </span>
+                <span id="cpuVal" class="text-sm font-mono font-bold text-tertiary-hot">85°C</span>
+              </div>
+              <input type="range" id="cpuSlider" min="40" max="105" step="1" value="85"/>
+              <div class="flex justify-between text-[10px] font-mono text-on-surface-variant">
+                <span>40°C (Idle)</span>
+                <span>105°C (Thermal Throttle)</span>
+              </div>
+            </div>
+
+            <!-- GPU Temp -->
+            <div class="flex flex-col gap-2 p-4 rounded-xl bg-surface-dim border border-white/5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-mono text-tertiary-amber flex items-center gap-1">
+                  <span class="w-2 h-2 rounded-full bg-tertiary-amber"></span>
+                  Discrete GPU Temperature
+                </span>
+                <span id="gpuVal" class="text-sm font-mono font-bold text-tertiary-amber">75°C</span>
+              </div>
+              <input type="range" id="gpuSlider" min="40" max="100" step="1" value="75"/>
+              <div class="flex justify-between text-[10px] font-mono text-on-surface-variant">
+                <span>40°C (Idle)</span>
+                <span>100°C (Heavy 3D Render)</span>
+              </div>
+            </div>
+
+            <!-- Battery Temp -->
+            <div class="flex flex-col gap-2 p-4 rounded-xl bg-surface-dim border border-white/5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-mono text-cyan-300">Battery Cell Temperature</span>
+                <span id="batteryVal" class="text-sm font-mono font-bold text-white">40°C</span>
+              </div>
+              <input type="range" id="batterySlider" min="20" max="60" step="1" value="40"/>
+              <div class="flex justify-between text-[10px] font-mono text-on-surface-variant">
+                <span>20°C (Ambient)</span>
+                <span>60°C (Fast Charge)</span>
+              </div>
+            </div>
+
+            <!-- Cooling Intensity -->
+            <div class="md:col-span-2 flex flex-col gap-2 p-4 rounded-xl bg-surface-dim border border-white/5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-mono text-primary font-semibold flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-[16px]">mode_fan</span>
+                  Active Cooling Intensity (Convection Fan Speed)
+                </span>
+                <span id="coolingVal" class="text-sm font-mono font-bold text-primary">60%</span>
+              </div>
+              <input type="range" id="coolingSlider" min="0" max="100" step="1" value="60"/>
+              <div class="flex justify-between text-[10px] font-mono text-on-surface-variant">
+                <span>0% (Passive Fanless)</span>
+                <span>100% (Turbofan Max RPM)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Computational Settings Strip -->
+          <div class="p-4 rounded-xl bg-surface-low border border-white/5 flex flex-wrap items-center justify-between gap-4">
+            <!-- Grid Resolution -->
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono text-on-surface-variant">Grid Resolution:</span>
+              <div class="inline-flex rounded-lg bg-surface-dim p-1 border border-white/5">
+                <button class="res-btn px-3 py-1 rounded text-xs font-mono text-on-surface-variant hover:text-white" data-res="low">Low (16x12)</button>
+                <button class="res-btn px-3 py-1 rounded text-xs font-mono bg-primary-container text-on-primary-container font-semibold" data-res="medium">Medium (24x18)</button>
+                <button class="res-btn px-3 py-1 rounded text-xs font-mono text-on-surface-variant hover:text-white" data-res="high">High (32x24)</button>
+              </div>
+            </div>
+
+            <!-- Solver Method -->
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono text-on-surface-variant">Iterative Solver:</span>
+              <select id="thermalMethodSelect" class="bg-surface-dim border border-white/10 rounded-lg px-3 py-1.5 text-xs font-mono text-white outline-none focus:border-primary">
+                <option value="gauss-seidel">Gauss-Seidel (Fast In-Place)</option>
+                <option value="jacobi">Jacobi (Simultaneous)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Run Simulation CTA -->
+          <button id="runThermalSimulationBtn" class="w-full py-4 rounded-xl bg-gradient-to-r from-secondary-container via-blue-600 to-primary text-white font-heading font-bold text-base flex items-center justify-center gap-2 shadow-xl shadow-blue-500/25 active:scale-98 transition-all">
+            <span class="material-symbols-outlined text-[20px]">play_arrow</span>
+            <span>Run Simulation</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1.4 THERMALX PROCESSING / SOLVER SCREEN -->
+    <section id="thermalx-solver" class="tab-screen">
+      <div class="max-w-4xl mx-auto flex flex-col gap-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="font-heading font-bold text-2xl text-white flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-primary animate-ping"></span>
+              <span>Thermal Simulation in Progress</span>
+            </h2>
+            <p class="text-xs font-mono text-on-surface-variant mt-1" id="solverMethodBadge">Using Gauss-Seidel Method</p>
+          </div>
+          <span class="text-xs font-mono px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/30">
+            SOLVER RUNNING
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          <!-- Left: Computational Telemetry Checklist & Circular Progress -->
+          <div class="lg:col-span-5 flex flex-col gap-5 bg-surface-card border border-white/10 rounded-2xl p-6 shadow-xl">
+            <!-- Step Checklist -->
+            <div class="flex flex-col gap-3 font-mono text-xs">
+              <div id="stepInit" class="flex items-center gap-2 text-on-surface-variant">
+                <span class="material-symbols-outlined text-[16px] text-emerald-400">check_circle</span>
+                <span>Initializing thermal grid</span>
+              </div>
+              <div id="stepBoundary" class="flex items-center gap-2 text-on-surface-variant">
+                <span class="material-symbols-outlined text-[16px] text-emerald-400">check_circle</span>
+                <span>Applying boundary conditions</span>
+              </div>
+              <div id="stepSources" class="flex items-center gap-2 text-on-surface-variant">
+                <span class="material-symbols-outlined text-[16px] text-emerald-400">check_circle</span>
+                <span>Mapping heat sources</span>
+              </div>
+              <div id="stepSolve" class="flex items-center gap-2 text-on-surface-variant">
+                <span class="material-symbols-outlined text-[16px] text-emerald-400">check_circle</span>
+                <span>Solving temperature field</span>
+              </div>
+            </div>
+
+            <!-- Circular Gauge -->
+            <div class="flex flex-col items-center justify-center py-2">
+              <div class="relative w-36 h-36 flex items-center justify-center">
+                <svg class="w-full h-full gauge-svg" viewBox="0 0 100 100">
+                  <circle class="gauge-circle-bg" cx="50" cy="50" r="40" stroke-width="8" fill="none"/>
+                  <circle id="solverCircleProgress" class="gauge-circle-fill" cx="50" cy="50" r="40" stroke-width="8" fill="none"
+                    stroke-dasharray="251.32" stroke-dashoffset="251.32"/>
+                </svg>
+                <div class="absolute flex flex-col items-center">
+                  <span id="solverPercentText" class="font-heading font-extrabold text-2xl text-white">0%</span>
+                  <span class="text-[10px] font-mono text-on-surface-variant">CONVERGENCE</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Telemetry Metrics -->
+            <div class="p-3 rounded-xl bg-surface-dim border border-white/5 flex flex-col gap-1 font-mono text-xs">
+              <div class="flex justify-between text-on-surface-variant">
+                <span>ITERATION:</span>
+                <span id="solverIterText" class="text-white font-bold">1 / 50</span>
+              </div>
+              <div class="flex justify-between text-on-surface-variant">
+                <span>RESIDUAL ERROR:</span>
+                <span id="solverErrorText" class="text-primary font-bold">Error: 0.0000</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: LIVE Canvas Heatmap -->
+          <div class="lg:col-span-7 flex flex-col gap-3">
+            <div class="relative w-full rounded-2xl bg-surface-dim border border-white/10 p-3 overflow-hidden shadow-2xl">
+              <canvas id="thermalLiveCanvas" width="560" height="380" class="w-full h-auto rounded-xl block"></canvas>
+            </div>
+            <div class="flex items-center justify-between text-[11px] font-mono text-on-surface-variant">
+              <span>LIVE FINITE-DIFFERENCE CONVERGENCE</span>
+              <span class="text-emerald-400">UPDATING IN REAL-TIME</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1.5 THERMALX RESULTS SCREEN -->
+    <section id="thermalx-results" class="tab-screen">
+      <div class="flex flex-col gap-6">
+        <!-- Header -->
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-3">
+              <h2 class="font-heading font-extrabold text-2xl sm:text-3xl text-white">Simulation Results</h2>
+              <span id="resStatusBadge" class="px-3 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                CONVERGED
+              </span>
+            </div>
+            <p class="text-xs text-on-surface-variant mt-1">Temperature distribution across the laptop chassis using Gauss-Seidel numerical solver.</p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <button id="showThermalMathBtn" class="px-4 py-2 rounded-xl bg-surface-low border border-white/10 hover:border-primary/40 text-xs font-mono text-white flex items-center gap-1.5 transition-all">
+              <span class="material-symbols-outlined text-[16px] text-primary">functions</span>
+              <span>Show the Math</span>
+            </button>
+            <button id="compareSolversBtn" class="px-4 py-2 rounded-xl bg-surface-low border border-white/10 hover:border-primary/40 text-xs font-mono text-white flex items-center gap-1.5 transition-all">
+              <span class="material-symbols-outlined text-[16px] text-tertiary-amber">compare_arrows</span>
+              <span>Compare Solvers</span>
+            </button>
+            <button id="optimizeCoolingBtn" class="px-4 py-2 rounded-xl bg-surface-low border border-white/10 hover:border-primary/40 text-xs font-mono text-white flex items-center gap-1.5 transition-all">
+              <span class="material-symbols-outlined text-[16px] text-emerald-400">tune</span>
+              <span>Optimize Cooling (Bisection)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Main Heatmap & Telemetry -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Canvas Heatmap Column -->
+          <div class="lg:col-span-8 flex flex-col gap-3">
+            <!-- Heatmap Viewport Stage -->
+            <div class="relative w-full rounded-2xl bg-surface-dim border border-white/10 p-4 shadow-2xl flex flex-col gap-3">
+              <!-- Top Floating Telemetry Chips (CPU & GPU & Battery) -->
+              <div class="flex items-center justify-between z-20">
+                <div class="flex items-center gap-2">
+                  <span class="px-3 py-1 rounded-md bg-surface-card/90 border border-white/10 text-xs font-mono text-white flex items-center gap-2 backdrop-blur-md shadow-lg">
+                    <span class="w-2 h-2 rounded-full bg-red-400 animate-pulse"></span>
+                    <span>CPU: <strong id="stageCpuTemp" class="text-red-400">85°C</strong></span>
+                  </span>
+                  <span class="px-3 py-1 rounded-md bg-surface-card/90 border border-white/10 text-xs font-mono text-white flex items-center gap-2 backdrop-blur-md shadow-lg">
+                    <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                    <span>GPU: <strong id="stageGpuTemp" class="text-amber-400">74.4°C</strong></span>
+                  </span>
+                  <span class="hidden sm:flex px-3 py-1 rounded-md bg-surface-card/90 border border-white/10 text-xs font-mono text-on-surface-variant items-center gap-2 backdrop-blur-md">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                    <span>Battery: <strong id="stageBatTemp" class="text-white">40°C</strong></span>
+                  </span>
+                </div>
+                <div id="resultsProbeTag" class="text-[11px] font-mono text-primary bg-primary/10 px-2.5 py-0.5 rounded border border-primary/20">
+                  READY
+                </div>
+              </div>
+
+              <!-- Main Canvas & Vertical Thermal Color Bar -->
+              <div class="relative flex gap-3 items-stretch">
+                <!-- Heatmap Canvas -->
+                <div class="relative flex-1 rounded-xl overflow-hidden bg-black/40 border border-white/5">
+                  <canvas id="thermalResultsCanvas" width="680" height="420" class="w-full h-auto block cursor-crosshair"></canvas>
+                </div>
+
+                <!-- Vertical Thermal Spectrum Bar (Matching user screenshot) -->
+                <div class="w-10 flex flex-col items-center justify-between py-1 px-1 bg-surface-card rounded-xl border border-white/5 select-none">
+                  <span class="text-[10px] font-mono text-red-400 font-bold">100°C</span>
+                  <div class="relative w-3 flex-1 my-2 rounded-full bg-gradient-to-b from-[#ff2a00] via-[#ff9800] via-[#10b981] to-[#00f0ff] shadow-inner">
+                    <!-- Dynamic Pip Tracker -->
+                    <div id="thermalPip" class="absolute -left-1 w-5 h-1.5 rounded-full bg-white shadow-md transition-all duration-75" style="top: 25%;"></div>
+                  </div>
+                  <span class="text-[10px] font-mono text-cyan-300 font-bold">25°C</span>
+                </div>
+              </div>
+
+              <!-- Bottom Heatmap Footer Bar -->
+              <div class="flex items-center justify-between px-1 pt-1 text-xs font-mono text-on-surface-variant">
+                <div class="flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-[16px] text-primary">info</span>
+                  <span>Hover across the grid to inspect local temperatures</span>
+                </div>
+                <button id="toggleSmoothingBtn" class="px-3 py-1 rounded-lg bg-surface-card border border-white/10 hover:border-primary/50 text-xs font-mono text-primary flex items-center gap-1.5 transition-all">
+                  <span>Smoothing:</span>
+                  <strong id="smoothingLabel" class="text-white">High (FLIR)</strong>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Side Telemetry KPI Cards -->
+          <div class="lg:col-span-4 flex flex-col gap-4">
+            <!-- Max Temp Card -->
+            <div class="p-5 rounded-xl bg-surface-card border border-white/10 flex items-center justify-between">
+              <div class="flex flex-col">
+                <span class="text-xs font-mono text-on-surface-variant uppercase">Max Temperature</span>
+                <div class="flex items-baseline gap-1 mt-1">
+                  <span id="resMaxTemp" class="font-heading font-extrabold text-3xl text-tertiary-hot">87.2</span>
+                  <span class="text-sm font-mono text-on-surface-variant">°C</span>
+                </div>
+              </div>
+              <div class="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-tertiary-hot">
+                <span class="material-symbols-outlined">device_thermostat</span>
+              </div>
+            </div>
+
+            <!-- Avg Temp Card -->
+            <div class="p-5 rounded-xl bg-surface-card border border-white/10 flex items-center justify-between">
+              <div class="flex flex-col">
+                <span class="text-xs font-mono text-on-surface-variant uppercase">Chassis Avg Temp</span>
+                <div class="flex items-baseline gap-1 mt-1">
+                  <span id="resAvgTemp" class="font-heading font-extrabold text-3xl text-cyan-300">46.3</span>
+                  <span class="text-sm font-mono text-on-surface-variant">°C</span>
+                </div>
+              </div>
+              <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-300">
+                <span class="material-symbols-outlined">equalizer</span>
+              </div>
+            </div>
+
+            <!-- Hotspots Card -->
+            <div class="p-5 rounded-xl bg-surface-card border border-white/10 flex items-center justify-between">
+              <div class="flex flex-col">
+                <span class="text-xs font-mono text-on-surface-variant uppercase">Detected Hotspots</span>
+                <div class="flex items-baseline gap-1 mt-1">
+                  <span id="resHotspots" class="font-heading font-extrabold text-3xl text-amber-400">2</span>
+                  <span class="text-xs font-mono text-on-surface-variant">cores &gt; 70°C</span>
+                </div>
+              </div>
+              <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                <span class="material-symbols-outlined">local_fire_department</span>
+              </div>
+            </div>
+
+            <!-- Primary Hotspot Card -->
+            <div class="p-5 rounded-xl bg-surface-dim border border-white/10 flex flex-col gap-2">
+              <span class="text-xs font-mono text-on-surface-variant">PRIMARY CRITICAL HOTSPOT</span>
+              <div class="flex items-center justify-between">
+                <span id="resHotspotName" class="font-heading font-bold text-base text-white">CPU Core Die</span>
+                <span id="resHotspotTemp" class="font-mono font-bold text-tertiary-hot text-base">87.2°C</span>
+              </div>
+              <div class="flex justify-between text-[11px] font-mono text-on-surface-variant pt-2 border-t border-white/5">
+                <span>Iterations: <strong id="resIterations" class="text-white">32</strong></span>
+                <span>Final Error: <strong id="resFinalError" class="text-primary">0.0008</strong></span>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-3 mt-2">
+              <button onclick="app.navigate('thermalx-config')" class="flex-1 py-3 rounded-xl bg-surface-low border border-white/10 hover:border-white/30 text-xs font-heading font-semibold text-white transition-all">
+                Try Again
+              </button>
+              <button id="exportThermalReportBtn" class="flex-1 py-3 rounded-xl bg-secondary-container hover:bg-blue-600 text-xs font-heading font-semibold text-white shadow-lg transition-all flex items-center justify-center gap-1.5">
+                <span class="material-symbols-outlined text-[16px]">download</span>
+                <span>Save Report</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1.6 THERMALX CUSTOM GRID DESIGNER -->
+    <section id="thermalx-custom" class="tab-screen">
+      <div class="flex flex-col gap-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="font-heading font-bold text-2xl text-white">Custom Grid Thermal Designer</h2>
+            <p class="text-xs text-on-surface-variant mt-1">Design your own thermal environment by placing heat sources and cooling sinks.</p>
+          </div>
+          <button onclick="app.navigate('thermalx-home')" class="text-xs font-mono text-on-surface-variant hover:text-white flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">close</span>
+            <span>Exit Designer</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Tools Palette (Left) -->
+          <div class="lg:col-span-3 flex flex-col gap-4">
+            <div class="p-5 rounded-2xl bg-surface-card border border-white/10 flex flex-col gap-3">
+              <span class="text-xs font-mono text-on-surface-variant uppercase tracking-wider">Placement Tools</span>
+              
+              <button class="grid-tool-btn p-3 rounded-xl bg-surface-dim border border-primary text-left flex items-center gap-3 transition-all" data-tool="heat">
+                <span class="material-symbols-outlined text-tertiary-hot">local_fire_department</span>
+                <div>
+                  <div class="font-heading font-semibold text-xs text-white">Heat Source</div>
+                  <div class="text-[10px] font-mono text-on-surface-variant">Inject thermal energy (90°C)</div>
+                </div>
+              </button>
+
+              <button class="grid-tool-btn p-3 rounded-xl bg-surface-dim border border-white/5 text-left flex items-center gap-3 transition-all" data-tool="cool">
+                <span class="material-symbols-outlined text-primary">mode_fan</span>
+                <div>
+                  <div class="font-heading font-semibold text-xs text-white">Cooling Sink</div>
+                  <div class="text-[10px] font-mono text-on-surface-variant">Active dissipation zone</div>
+                </div>
+              </button>
+
+              <button class="grid-tool-btn p-3 rounded-xl bg-surface-dim border border-white/5 text-left flex items-center gap-3 transition-all" data-tool="eraser">
+                <span class="material-symbols-outlined text-on-surface-variant">ink_eraser</span>
+                <div>
+                  <div class="font-heading font-semibold text-xs text-white">Eraser</div>
+                  <div class="text-[10px] font-mono text-on-surface-variant">Clear cell elements</div>
+                </div>
+              </button>
+            </div>
+
+            <!-- Selected Cell Inspector -->
+            <div id="customPropPanel" class="p-5 rounded-2xl bg-surface-dim border border-white/10 flex flex-col gap-2">
+              <span class="text-xs font-mono text-primary uppercase">Cell Inspector</span>
+              <div class="flex justify-between text-xs font-mono text-on-surface-variant">
+                <span>Coordinates:</span>
+                <span id="propCoord" class="text-white font-bold">[4, 4]</span>
+              </div>
+              <div class="flex justify-between text-xs font-mono text-on-surface-variant">
+                <span>Temperature:</span>
+                <span id="propTemp" class="text-tertiary-hot font-bold">90.0°C</span>
+              </div>
+            </div>
+
+            <div class="flex gap-2">
+              <button id="clearCustomGridBtn" class="flex-1 py-2.5 rounded-xl bg-surface-low border border-white/10 hover:border-white/20 text-xs font-mono text-on-surface-variant transition-all">
+                Clear All
+              </button>
+              <button id="simulateCustomGridBtn" class="flex-1 py-2.5 rounded-xl bg-primary hover:bg-cyan-300 text-xs font-heading font-bold text-surface-dim shadow-lg transition-all">
+                Simulate Grid
+              </button>
+            </div>
+          </div>
+
+          <!-- Interactive Grid Matrix Canvas -->
+          <div class="lg:col-span-9 flex flex-col gap-3">
+            <div class="relative w-full rounded-2xl bg-surface-dim border border-white/10 p-3 shadow-2xl flex items-center justify-center">
+              <canvas id="customGridCanvas" width="600" height="450" class="w-full h-auto rounded-xl block cursor-pointer"></canvas>
+            </div>
+            <div class="flex items-center justify-between text-[11px] font-mono text-on-surface-variant">
+              <span>CLICK CELLS ON GRID TO PLACE TOOL</span>
+              <span>16x16 FINITE-DIFFERENCE MESH</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1.7 THERMALX CHALLENGES SCREEN -->
+    <section id="thermalx-challenge" class="tab-screen">
+      <div class="max-w-3xl mx-auto flex flex-col gap-6">
+        <div class="flex items-center justify-between">
+          <button onclick="app.navigate('thermalx-home')" class="flex items-center gap-1.5 text-xs font-mono text-on-surface-variant hover:text-white transition-colors">
+            <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+            <span>BACK</span>
+          </button>
+          <span class="text-xs font-mono px-3 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30">
+            CHALLENGE #1: COOL THE SYSTEM
+          </span>
+        </div>
+
+        <div class="p-6 sm:p-8 rounded-2xl bg-surface-card border border-white/10 shadow-2xl flex flex-col gap-6">
+          <div>
+            <h2 class="font-heading font-bold text-2xl text-white">Cool the Overheating System</h2>
+            <p class="text-xs text-on-surface-variant mt-1">
+              Reduce the maximum temperature below <strong>75.0°C</strong> using minimal power consumption and balanced cooling controls.
+            </p>
+          </div>
+
+          <!-- Current vs Target Cards -->
+          <div class="grid grid-cols-2 gap-4">
+            <div class="p-4 rounded-xl bg-red-950/30 border border-red-500/30 flex items-center justify-between">
+              <div>
+                <span class="text-[11px] font-mono text-red-400">CURRENT MAX TEMP</span>
+                <div class="font-heading font-extrabold text-2xl text-white mt-0.5">91.4°C</div>
+              </div>
+              <span class="material-symbols-outlined text-red-400 text-[28px]">warning</span>
+            </div>
+
+            <div class="p-4 rounded-xl bg-emerald-950/30 border border-emerald-500/30 flex items-center justify-between">
+              <div>
+                <span class="text-[11px] font-mono text-emerald-400">TARGET THRESHOLD</span>
+                <div class="font-heading font-extrabold text-2xl text-white mt-0.5">&le; 75.0°C</div>
+              </div>
+              <span class="material-symbols-outlined text-emerald-400 text-[28px]">verified</span>
+            </div>
+          </div>
+
+          <!-- Cooling Controls -->
+          <div class="flex flex-col gap-4">
+            <div class="p-4 rounded-xl bg-surface-dim border border-white/5 flex flex-col gap-2">
+              <div class="flex justify-between text-xs font-mono">
+                <span class="text-on-surface-variant">Fan Speed (Forced Convection)</span>
+                <span id="chFanVal" class="text-primary font-bold">40%</span>
+              </div>
+              <input type="range" id="chFanSlider" min="0" max="100" value="40" oninput="document.getElementById('chFanVal').textContent = this.value + '%'"/>
+            </div>
+
+            <div class="p-4 rounded-xl bg-surface-dim border border-white/5 flex flex-col gap-2">
+              <div class="flex justify-between text-xs font-mono">
+                <span class="text-on-surface-variant">Heat Sink Contact Conduction</span>
+                <span id="chSinkVal" class="text-cyan-300 font-bold">50%</span>
+              </div>
+              <input type="range" id="chSinkSlider" min="10" max="100" value="50" oninput="document.getElementById('chSinkVal').textContent = this.value + '%'"/>
+            </div>
+
+            <div class="p-4 rounded-xl bg-surface-dim border border-white/5 flex flex-col gap-2">
+              <div class="flex justify-between text-xs font-mono">
+                <span class="text-on-surface-variant">Chassis Ventilation Exhaust</span>
+                <span id="chVentVal" class="text-amber-300 font-bold">30%</span>
+              </div>
+              <input type="range" id="chVentSlider" min="10" max="100" value="30" oninput="document.getElementById('chVentVal').textContent = this.value + '%'"/>
+            </div>
+          </div>
+
+          <button onclick="
+            const fan = parseInt(document.getElementById('chFanSlider').value);
+            const sink = parseInt(document.getElementById('chSinkSlider').value);
+            const vent = parseInt(document.getElementById('chVentSlider').value);
+            const effectiveCooling = (fan * 0.5 + sink * 0.3 + vent * 0.2) / 100;
+            app.thermalConfig.cooling = effectiveCooling;
+            app.thermalConfig.cpu = 88;
+            app.thermalConfig.gpu = 78;
+            app.runThermalSimulation();
+          " class="w-full py-4 rounded-xl bg-gradient-to-r from-secondary-container to-primary text-white font-heading font-bold text-sm shadow-xl active:scale-98 transition-all">
+            Run Challenge Simulation
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- [2] LINKRANK MODULE SCREENS -->
+    <!-- ========================================================= -->
+
+    <!-- 2.1 LINKRANK HOME SCREEN -->
+    <section id="linkrank-home" class="tab-screen">
+      <div class="flex flex-col gap-6">
+        <!-- Hero Card -->
+        <div class="relative w-full rounded-2xl bg-surface-dim border border-white/10 p-6 lg:p-10 overflow-hidden shadow-2xl">
+          <!-- Background Atmospheric Nebula -->
+          <div class="absolute -top-20 -left-20 w-96 h-96 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+          <div class="absolute -bottom-20 -right-20 w-96 h-96 rounded-full bg-secondary-container/20 blur-3xl pointer-events-none"></div>
+
+          <div class="flex items-center justify-between mb-6 relative z-10">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-high/80 border border-primary/30">
+              <span class="w-2 h-2 rounded-full bg-primary animate-ping"></span>
+              <span class="text-xs font-mono text-primary font-semibold uppercase">Eigenvalue &amp; Centrality Engine</span>
+            </div>
+            <span class="text-xs font-mono text-on-surface-variant">POWER ITERATION METHOD · PERRON-FROBENIUS</span>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+            <div class="lg:col-span-6 flex flex-col gap-4">
+              <div class="flex items-center gap-2 text-primary text-xs font-mono uppercase tracking-widest">
+                <span class="material-symbols-outlined text-[18px]">schema</span>
+                <span>Network Graph Mathematics</span>
+              </div>
+              <h1 class="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight leading-tight">
+                LINKRANK
+              </h1>
+              <p class="text-lg text-primary font-heading font-semibold">
+                Connect • Influence • Discover
+              </p>
+              <p class="text-sm text-on-surface-variant leading-relaxed">
+                Discover how network topology shapes computational influence. Watch adjacency matrices transform into dominant eigenvectors via power iteration, and witness instant ranking shifts with the interactive "What If?" live topology engine.
+              </p>
+
+              <div class="pt-2 flex flex-wrap gap-4">
+                <button onclick="app.navigate('linkrank-select')" class="px-6 py-3.5 rounded-xl bg-gradient-to-r from-secondary-container to-blue-600 hover:from-blue-600 hover:to-primary text-white font-heading font-bold text-sm flex items-center gap-2 shadow-lg shadow-secondary-container/30 active:scale-95 transition-all">
+                  <span>Explore Network</span>
+                  <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                </button>
+                <button onclick="app.navigate('linkrank-select')" class="px-5 py-3.5 rounded-xl bg-surface-low border border-white/10 hover:border-primary/40 text-on-surface font-heading font-semibold text-sm flex items-center gap-2 transition-all">
+                  <span class="material-symbols-outlined text-[18px] text-cyan-300">hub</span>
+                  <span>Preset Graphs</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Right Visual Graphic -->
+            <div class="lg:col-span-6 flex items-center justify-center">
+              <div class="relative w-full max-w-md aspect-[16/11] rounded-2xl bg-surface-low border border-white/10 p-4 flex flex-col items-center justify-center overflow-hidden shadow-2xl cursor-pointer" onclick="app.navigate('linkrank-select')">
+                <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,240,255,0.15),transparent_65%)]"></div>
+                
+                <!-- SVG Network Constellation -->
+                <svg class="w-full h-full relative z-10" viewBox="0 0 340 240" fill="none">
+                  <!-- Connection Lines with Glow -->
+                  <line x1="170" y1="50" x2="270" y2="120" stroke="#00f0ff" stroke-width="2" stroke-opacity="0.8"/>
+                  <line x1="270" y1="120" x2="220" y2="200" stroke="#3b82f6" stroke-width="1.8" stroke-dasharray="3 3"/>
+                  <line x1="220" y1="200" x2="120" y2="200" stroke="#ff9800" stroke-width="2"/>
+                  <line x1="120" y1="200" x2="70" y2="120" stroke="#00f0ff" stroke-width="1.8"/>
+                  <line x1="70" y1="120" x2="170" y2="50" stroke="#ff5722" stroke-width="2.5"/>
+                  <line x1="70" y1="120" x2="270" y2="120" stroke="#adc6ff" stroke-width="1" stroke-opacity="0.4"/>
+
+                  <!-- Nodes with Proportional Radii -->
+                  <!-- Top: GitHub (Rank #2) -->
+                  <circle cx="170" cy="50" r="22" fill="#161b2a" stroke="#00f0ff" stroke-width="2"/>
+                  <circle cx="170" cy="50" r="14" fill="#006970"/>
+                  <text x="170" y="86" fill="#dee2f6" font-family="Space Grotesk" font-size="11" font-weight="bold" text-anchor="middle">GitHub</text>
+
+                  <!-- Right: Wikipedia (Rank #1 - Dominant) -->
+                  <circle cx="270" cy="120" r="32" fill="#3b0900" stroke="#ff5722" stroke-width="3"/>
+                  <circle cx="270" cy="120" r="22" fill="#93000a"/>
+                  <text x="270" y="166" fill="#ffb4ab" font-family="Space Grotesk" font-size="12" font-weight="bold" text-anchor="middle">Wikipedia</text>
+
+                  <!-- Bottom Right: MDN -->
+                  <circle cx="220" cy="200" r="18" fill="#161b2a" stroke="#3b82f6" stroke-width="1.5"/>
+                  <text x="220" y="228" fill="#dee2f6" font-family="Space Grotesk" font-size="10" text-anchor="middle">MDN</text>
+
+                  <!-- Bottom Left: Python -->
+                  <circle cx="120" cy="200" r="20" fill="#161b2a" stroke="#adc6ff" stroke-width="1.5"/>
+                  <text x="120" y="228" fill="#dee2f6" font-family="Space Grotesk" font-size="10" text-anchor="middle">Python</text>
+
+                  <!-- Left: Stack Overflow -->
+                  <circle cx="70" cy="120" r="24" fill="#161b2a" stroke="#ff9800" stroke-width="2"/>
+                  <circle cx="70" cy="120" r="16" fill="#b12f00"/>
+                  <text x="70" y="156" fill="#dee2f6" font-family="Space Grotesk" font-size="10" text-anchor="middle">StackOverflow</text>
+                </svg>
+
+                <div class="absolute bottom-5 right-6 z-20 flex items-center gap-2 px-3 py-1 rounded-lg bg-surface-dim/90 border border-primary/40 text-xs font-mono text-primary">
+                  DOMINANT EIGENVECTOR λ₁ = 1.000
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 Quick Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div onclick="app.currentCategory = 'technology'; app.network = LinkRankNetwork.createPreset('technology'); app.navigate('linkrank-editor');" class="p-6 rounded-xl bg-surface-card border border-white/10 hover:border-primary/50 cursor-pointer group transition-all hover:-translate-y-1 shadow-xl">
+            <span class="material-symbols-outlined text-[28px] text-primary mb-3">account_tree</span>
+            <h3 class="font-heading font-bold text-lg text-white mb-1">Predefined Networks</h3>
+            <p class="text-xs text-on-surface-variant">Technology, Education, Space exploration, and Social structures.</p>
+          </div>
+
+          <div onclick="app.currentCategory = 'custom'; app.network = new LinkRankNetwork(); app.navigate('linkrank-editor');" class="p-6 rounded-xl bg-surface-card border border-white/10 hover:border-primary/50 cursor-pointer group transition-all hover:-translate-y-1 shadow-xl">
+            <span class="material-symbols-outlined text-[28px] text-cyan-300 mb-3">draw</span>
+            <h3 class="font-heading font-bold text-lg text-white mb-1">Build Network</h3>
+            <p class="text-xs text-on-surface-variant">Create arbitrary directed topologies with custom nodes and edges.</p>
+          </div>
+
+          <div onclick="app.navigate('linkrank-select')" class="p-6 rounded-xl bg-surface-card border border-white/10 hover:border-primary/50 cursor-pointer group transition-all hover:-translate-y-1 shadow-xl">
+            <span class="material-symbols-outlined text-[28px] text-amber-400 mb-3">alt_route</span>
+            <h3 class="font-heading font-bold text-lg text-white mb-1">What-If Analysis</h3>
+            <p class="text-xs text-on-surface-variant">Sever or redirect links to watch rankings dynamically invert.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2.2 LINKRANK CHOOSE NETWORK SCREEN -->
+    <section id="linkrank-select" class="tab-screen">
+      <div class="max-w-2xl mx-auto flex flex-col gap-6">
+        <div class="flex items-center justify-between">
+          <button onclick="app.navigate('linkrank-home')" class="flex items-center gap-1.5 text-xs font-mono text-on-surface-variant hover:text-white transition-colors">
+            <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+            <span>BACK</span>
+          </button>
+          <span class="text-xs font-mono text-primary uppercase">Select Topology</span>
+        </div>
+
+        <div class="text-center">
+          <h2 class="font-heading font-bold text-2xl sm:text-3xl text-white">Select a Network Model</h2>
+          <p class="text-sm text-on-surface-variant mt-1">Start with an educational preset or build your own directed graph.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+          <!-- Tech -->
+          <div class="network-category-card p-5 rounded-2xl bg-surface-card border border-white/10 hover:border-primary flex flex-col justify-between cursor-pointer transition-all shadow-xl group" data-category="technology">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="material-symbols-outlined text-primary text-[28px]">terminal</span>
+              <h3 class="font-heading font-bold text-base text-white group-hover:text-primary">Technology</h3>
+            </div>
+            <p class="text-xs text-on-surface-variant">GitHub, Wikipedia, Stack Overflow, MDN, Python.</p>
+            <div class="mt-4 text-[10px] font-mono text-primary">5 NODES · 7 EDGES</div>
+          </div>
+
+          <!-- Education -->
+          <div class="network-category-card p-5 rounded-2xl bg-surface-card border border-white/10 hover:border-primary flex flex-col justify-between cursor-pointer transition-all shadow-xl group" data-category="education">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="material-symbols-outlined text-secondary text-[28px]">school</span>
+              <h3 class="font-heading font-bold text-base text-white group-hover:text-primary">Education</h3>
+            </div>
+            <p class="text-xs text-on-surface-variant">MIT, Stanford, CMU, Harvard, arXiv, Coursera.</p>
+            <div class="mt-4 text-[10px] font-mono text-secondary">6 NODES · 9 EDGES</div>
+          </div>
+
+          <!-- Space -->
+          <div class="network-category-card p-5 rounded-2xl bg-surface-card border border-white/10 hover:border-primary flex flex-col justify-between cursor-pointer transition-all shadow-xl group" data-category="space">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="material-symbols-outlined text-amber-400 text-[28px]">rocket_launch</span>
+              <h3 class="font-heading font-bold text-base text-white group-hover:text-primary">Space Agencies</h3>
+            </div>
+            <p class="text-xs text-on-surface-variant">NASA, SpaceX, ESA, ISRO, JAXA, Hubble.</p>
+            <div class="mt-4 text-[10px] font-mono text-amber-400">6 NODES · 8 EDGES</div>
+          </div>
+
+          <!-- Social -->
+          <div class="network-category-card p-5 rounded-2xl bg-surface-card border border-white/10 hover:border-primary flex flex-col justify-between cursor-pointer transition-all shadow-xl group" data-category="social">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="material-symbols-outlined text-emerald-400 text-[28px]">group</span>
+              <h3 class="font-heading font-bold text-base text-white group-hover:text-primary">Social Hierarchy</h3>
+            </div>
+            <p class="text-xs text-on-surface-variant">Alex, Maya, Sam, Jordan, Chris, Taylor.</p>
+            <div class="mt-4 text-[10px] font-mono text-emerald-400">6 NODES · 8 EDGES</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2.3 LINKRANK NETWORK EDITOR SCREEN -->
+    <section id="linkrank-editor" class="tab-screen">
+      <div class="flex flex-col gap-6">
+        <!-- Top Toolbar -->
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <button onclick="app.navigate('linkrank-select')" class="w-8 h-8 rounded-lg bg-surface-low border border-white/10 flex items-center justify-center text-on-surface-variant hover:text-white">
+              <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+            </button>
+            <div>
+              <h2 class="font-heading font-bold text-2xl text-white flex items-center gap-2">
+                <span>Interactive Network Topology</span>
+              </h2>
+              <p class="text-xs text-on-surface-variant">Drag nodes to rearrange. Click to inspect influence connections.</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <span id="networkMetaTag" class="text-xs font-mono px-3 py-1 rounded-full bg-surface-high border border-white/10 text-primary">
+              5 Nodes • 7 Edges
+            </span>
+            <button id="resetNetworkBtn" class="px-3 py-1.5 rounded-lg bg-surface-low border border-white/10 hover:border-white/20 text-xs font-mono text-on-surface-variant">
+              Reset Topology
+            </button>
+            <button id="calculateLinkRankBtn" class="px-5 py-2 rounded-xl bg-gradient-to-r from-secondary-container to-primary text-white font-heading font-bold text-xs shadow-lg shadow-blue-500/20 active:scale-95 transition-all flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px]">calculate</span>
+              <span>Calculate Ranking</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Center Canvas Graph Area -->
+          <div class="lg:col-span-8 flex flex-col gap-3">
+            <div class="relative w-full rounded-2xl bg-surface-dim border border-white/10 p-3 shadow-2xl flex items-center justify-center">
+              <canvas id="networkEditorCanvas" width="680" height="420" class="w-full h-auto rounded-xl block"></canvas>
+            </div>
+            <div class="flex items-center justify-between text-[11px] font-mono text-on-surface-variant">
+              <span>FORCE-DIRECTED PHYSICS ENGINE ACTIVE</span>
+              <span>DRAG NODES TO ORBIT</span>
+            </div>
+          </div>
+
+          <!-- Right Tools Panel -->
+          <div class="lg:col-span-4 flex flex-col gap-4">
+            <!-- Add Node Card -->
+            <div class="p-5 rounded-xl bg-surface-card border border-white/10 flex flex-col gap-3">
+              <span class="text-xs font-mono text-primary uppercase">Add New Entity Node</span>
+              <input type="text" id="newNodeName" placeholder="Node name (e.g. arXiv)" class="bg-surface-dim border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white outline-none focus:border-primary"/>
+              <input type="text" id="newNodeCategory" placeholder="Category (e.g. Research)" class="bg-surface-dim border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white outline-none focus:border-primary"/>
+              <button id="addNodeBtn" class="py-2 rounded-lg bg-surface-high hover:bg-surface-highest text-xs font-heading font-semibold text-white transition-colors">
+                + Add Node
+              </button>
+            </div>
+
+            <!-- Add Directed Link Card -->
+            <div class="p-5 rounded-xl bg-surface-card border border-white/10 flex flex-col gap-3">
+              <span class="text-xs font-mono text-primary uppercase">Connect Directed Link</span>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <span class="text-[10px] font-mono text-on-surface-variant">FROM (SOURCE):</span>
+                  <select id="linkFromSelect" class="w-full mt-1 bg-surface-dim border border-white/10 rounded-lg px-2 py-1.5 text-xs font-mono text-white outline-none"></select>
+                </div>
+                <div>
+                  <span class="text-[10px] font-mono text-on-surface-variant">TO (TARGET):</span>
+                  <select id="linkToSelect" class="w-full mt-1 bg-surface-dim border border-white/10 rounded-lg px-2 py-1.5 text-xs font-mono text-white outline-none"></select>
+                </div>
+              </div>
+              <button id="addLinkBtn" class="py-2 rounded-lg bg-secondary-container hover:bg-blue-600 text-xs font-heading font-semibold text-white transition-colors">
+                + Add Link (Transfer Influence)
+              </button>
+            </div>
+
+            <!-- Selected Node Inspector -->
+            <div id="selectedNodeInspector" class="hidden p-5 rounded-xl bg-surface-dim border border-white/10 flex flex-col gap-2">
+              <span class="text-xs font-mono text-cyan-300 uppercase">Selected Node Telemetry</span>
+              <div class="font-heading font-bold text-base text-white" id="inspectNodeName">Wikipedia</div>
+              <div class="text-xs text-on-surface-variant" id="inspectNodeCategory">Knowledge Base</div>
+              <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-white/5 font-mono text-xs">
+                <div>In-Degree: <strong id="inspectNodeInDeg" class="text-emerald-400">2</strong></div>
+                <div>Out-Degree: <strong id="inspectNodeOutDeg" class="text-amber-400">1</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2.4 LINKRANK PROCESSING SCREEN -->
+    <section id="linkrank-solver" class="tab-screen">
+      <div class="max-w-3xl mx-auto flex flex-col gap-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="font-heading font-bold text-2xl text-white flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-primary animate-ping"></span>
+              <span>Calculating Node Importance</span>
+            </h2>
+            <p class="text-xs font-mono text-on-surface-variant mt-1">Power Iteration for Dominant Eigenvector</p>
+          </div>
+          <span class="text-xs font-mono px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/30">
+            COMPUTING CENTRALITY
+          </span>
+        </div>
+
+        <div class="p-8 rounded-2xl bg-surface-card border border-white/10 shadow-2xl flex flex-col gap-6">
+          <!-- Step Checklist -->
+          <div class="flex flex-col gap-3 font-mono text-xs">
+            <div class="flex items-center gap-2 text-primary">
+              <span class="material-symbols-outlined text-[16px] text-emerald-400">check_circle</span>
+              <span>Building NxN Adjacency Matrix A</span>
+            </div>
+            <div class="flex items-center gap-2 text-primary">
+              <span class="material-symbols-outlined text-[16px] text-emerald-400">check_circle</span>
+              <span>Normalizing column-stochastic transition matrix M</span>
+            </div>
+            <div class="flex items-center gap-2 text-primary">
+              <span class="material-symbols-outlined text-[16px] text-emerald-400">check_circle</span>
+              <span>Computing dominant eigenvector via Power Iteration: v^(k+1) = G * v^k</span>
+            </div>
+            <div class="flex items-center gap-2 text-primary">
+              <span class="material-symbols-outlined text-[16px] text-emerald-400">check_circle</span>
+              <span>Normalizing stationary probability distribution scores</span>
+            </div>
+          </div>
+
+          <!-- Circular Gauge -->
+          <div class="flex flex-col items-center justify-center py-4">
+            <div class="relative w-36 h-36 flex items-center justify-center">
+              <svg class="w-full h-full gauge-svg" viewBox="0 0 100 100">
+                <circle class="gauge-circle-bg" cx="50" cy="50" r="40" stroke-width="8" fill="none"/>
+                <circle id="linkrankCircleProgress" class="gauge-circle-fill" cx="50" cy="50" r="40" stroke-width="8" fill="none"
+                  stroke-dasharray="251.32" stroke-dashoffset="251.32"/>
+              </svg>
+              <div class="absolute flex flex-col items-center">
+                <span id="linkrankPercentText" class="font-heading font-extrabold text-2xl text-white">0%</span>
+                <span class="text-[10px] font-mono text-on-surface-variant">EIGENVECTOR</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-3 rounded-xl bg-surface-dim border border-white/5 flex justify-between font-mono text-xs">
+            <span id="linkrankIterText" class="text-white">Iteration 6 / 20</span>
+            <span id="linkrankErrorText" class="text-primary font-bold">Error: 0.0063</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2.5 LINKRANK RESULTS SCREEN -->
+    <section id="linkrank-results" class="tab-screen">
+      <div class="flex flex-col gap-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 class="font-heading font-extrabold text-2xl sm:text-3xl text-white">Network Centrality Results</h2>
+            <p class="text-xs text-on-surface-variant mt-1">Importance scores computed from the dominant eigenvector of the transition matrix.</p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <button id="showLinkRankMathBtn" class="px-4 py-2 rounded-xl bg-surface-low border border-white/10 hover:border-primary/40 text-xs font-mono text-white flex items-center gap-1.5 transition-all">
+              <span class="material-symbols-outlined text-[16px] text-primary">functions</span>
+              <span>Show the Math</span>
+            </button>
+            <button id="whatIfBtn" class="px-5 py-2 rounded-xl bg-gradient-to-r from-tertiary-hot to-amber-500 text-white font-heading font-bold text-xs shadow-lg shadow-orange-500/20 active:scale-95 transition-all flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px]">alt_route</span>
+              <span>What If? (Live Topology Changes)</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Leaderboard Table (Left) -->
+          <div class="lg:col-span-5 flex flex-col gap-4">
+            <div class="rounded-2xl bg-surface-card border border-white/10 p-5 shadow-2xl flex flex-col gap-4">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-mono text-on-surface-variant uppercase tracking-wider">Eigenvector Centrality Ranking</span>
+                <span class="text-[10px] font-mono text-emerald-400">λ₁ = 1.000</span>
+              </div>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                  <thead>
+                    <tr class="border-b border-white/10 text-[10px] font-mono text-on-surface-variant">
+                      <th class="pb-2 px-3">RANK</th>
+                      <th class="pb-2 px-3">NODE</th>
+                      <th class="pb-2 px-3 text-right">SCORE</th>
+                      <th class="pb-2 px-3">INFLUENCE</th>
+                    </tr>
+                  </thead>
+                  <tbody id="rankingsTableBody">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Top Node Highlight -->
+              <div class="mt-2 p-4 rounded-xl bg-gradient-to-r from-amber-500/10 via-surface-dim to-transparent border border-amber-500/30 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/50 flex items-center justify-center text-amber-400 font-bold">
+                    #1
+                  </div>
+                  <div>
+                    <span class="text-[10px] font-mono text-amber-400">TOP NETWORK AUTHORITY</span>
+                    <div id="topNodeName" class="font-heading font-bold text-sm text-white">Wikipedia</div>
+                  </div>
+                </div>
+                <span id="topNodeScore" class="font-mono text-xs text-amber-300 font-bold">Score: 0.4200</span>
+              </div>
+
+              <button onclick="app.navigate('linkrank-editor')" class="w-full py-2.5 rounded-xl bg-surface-low border border-white/10 hover:border-white/20 text-xs font-heading font-semibold text-white transition-all">
+                Edit Network Topology
+              </button>
+            </div>
+          </div>
+
+          <!-- Scaled Graph Visualizer (Right) -->
+          <div class="lg:col-span-7 flex flex-col gap-3">
+            <div class="relative w-full rounded-2xl bg-surface-dim border border-white/10 p-3 shadow-2xl flex items-center justify-center">
+              <canvas id="networkResultsCanvas" width="620" height="420" class="w-full h-auto rounded-xl block"></canvas>
+            </div>
+            <div class="flex items-center justify-between text-[11px] font-mono text-on-surface-variant">
+              <span>NODE RADII &amp; GLOW SCALED TO CALCULATED CENTRALITY</span>
+              <span class="text-primary font-bold">DRAGGABLE VISUALIZATION</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- [3] NUMERICAL LAB (ACADEMIC VIVA SUITE) -->
+    <!-- ========================================================= -->
+    <section id="academic-hub" class="tab-screen">
+      <div class="flex flex-col gap-6">
+        <div>
+          <div class="flex items-center gap-2 text-primary text-xs font-mono uppercase tracking-widest">
+            <span class="material-symbols-outlined text-[16px]">menu_book</span>
+            <span>Computational Mathematics Viva Showcase</span>
+          </div>
+          <h2 class="font-heading font-extrabold text-2xl sm:text-3xl text-white mt-1">Numerical Methods Academic Laboratory</h2>
+          <p class="text-xs text-on-surface-variant mt-1">
+            Interactive, mathematically verified tools for academic presentation, syllabus demonstration, and viva inspection.
+          </p>
+        </div>
+
+        <!-- Academic Subtabs -->
+        <div class="flex flex-wrap gap-2 p-1.5 rounded-xl bg-surface-card border border-white/10">
+          <button class="academic-subtab-btn px-4 py-2 rounded-lg text-xs font-heading font-semibold bg-primary-container text-on-primary-container" data-tab="academic-linear">
+            Jacobi vs Gauss-Seidel
+          </button>
+          <button class="academic-subtab-btn px-4 py-2 rounded-lg text-xs font-heading font-semibold text-on-surface-variant hover:text-white" data-tab="academic-bisection">
+            Bisection Method
+          </button>
+          <button class="academic-subtab-btn px-4 py-2 rounded-lg text-xs font-heading font-semibold text-on-surface-variant hover:text-white" data-tab="academic-newton">
+            Newton-Raphson
+          </button>
+          <button class="academic-subtab-btn px-4 py-2 rounded-lg text-xs font-heading font-semibold text-on-surface-variant hover:text-white" data-tab="academic-power">
+            Eigenvalues (Power Method)
+          </button>
+        </div>
+
+        <!-- Tab 1: Jacobi vs Gauss-Seidel -->
+        <div id="academic-linear" class="academic-tab-content flex flex-col gap-6">
+          <div class="p-6 rounded-2xl bg-surface-card border border-white/10 shadow-xl flex flex-col gap-5">
+            <!-- Header & Presets -->
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div>
+                <h3 class="font-heading font-bold text-lg text-white flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary text-[20px]">sync_alt</span>
+                  <span>Linear Systems: Jacobi vs Gauss-Seidel Iteration</span>
+                </h3>
+                <p class="text-xs text-on-surface-variant mt-0.5" id="linearPresetDesc">
+                  Strictly diagonally dominant (|a_ii| > Σ|a_ij|), ensuring guaranteed Jacobi and Gauss-Seidel convergence.
+                </p>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <select id="linearPresetSelect" class="bg-surface-low border border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-primary">
+                  <option value="standard">Preset 1: 4x4 Diagonally Dominant</option>
+                  <option value="thermal">Preset 2: 3x3 Heat Conduction Rod</option>
+                  <option value="slow">Preset 3: 3x3 Weakly Dominant (2.5x Speedup)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Math Equation Strip -->
+            <div id="linearEquationStrip" class="p-4 rounded-xl bg-surface-dim border border-white/5 font-mono text-xs text-cyan-300 overflow-x-auto whitespace-nowrap">
+              10x₁ - x₂ + 2x₃ = 6 &nbsp;|&nbsp; -x₁ + 11x₂ - x₃ + 3x₄ = 25 &nbsp;|&nbsp; 2x₁ - x₂ + 10x₃ - x₄ = -11 &nbsp;|&nbsp; 3x₂ - x₃ + 8x₄ = 15
+            </div>
+
+            <!-- Controls & Canvas Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+              <!-- Left: Canvas Convergence Plot -->
+              <div class="lg:col-span-7 flex flex-col gap-2 p-4 rounded-xl bg-surface-dim border border-white/5">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-mono text-on-surface-variant flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[14px] text-primary">show_chart</span>
+                    <span>LOGARITHMIC RESIDUAL ERROR CONVERGENCE</span>
+                  </span>
+                  <div class="flex items-center gap-3 text-[11px] font-mono">
+                    <span class="text-cyan-400">● Jacobi</span>
+                    <span class="text-orange-500">● Gauss-Seidel</span>
+                  </div>
+                </div>
+                <div class="relative w-full h-48 bg-surface-low rounded-lg overflow-hidden border border-white/5">
+                  <canvas id="academicLinearCanvas" class="w-full h-full block"></canvas>
+                </div>
+              </div>
+
+              <!-- Right: Interactive Controls & Telemetry -->
+              <div class="lg:col-span-5 flex flex-col justify-between gap-3 p-4 rounded-xl bg-surface-dim border border-white/5">
+                <div class="flex flex-col gap-3">
+                  <span class="text-xs font-mono text-on-surface-variant uppercase tracking-wider">SOLVER CONTROLS</span>
+                  <div class="flex flex-col gap-1.5">
+                    <div class="flex justify-between text-xs font-mono">
+                      <span class="text-on-surface-variant">Convergence Tolerance:</span>
+                      <span id="linearTolVal" class="text-primary font-bold">1e-4</span>
+                    </div>
+                    <input type="range" id="linearTolSlider" min="2" max="6" step="1" value="4" class="w-full accent-primary cursor-pointer"/>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2 pt-2 border-t border-white/5">
+                  <button id="runAcademicLinearBtn" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-secondary-container to-primary text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg active:scale-95 transition-all">
+                    <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+                    <span>Run Solver Animated</span>
+                  </button>
+                  <button id="stepAcademicLinearBtn" class="px-3 py-2.5 rounded-xl bg-surface-card border border-white/10 hover:border-primary text-white font-mono text-xs flex items-center gap-1 transition-all" title="Step one iteration forward">
+                    <span class="material-symbols-outlined text-[16px]">skip_next</span>
+                    <span>Step</span>
+                  </button>
+                  <button id="resetAcademicLinearBtn" class="px-3 py-2.5 rounded-xl bg-surface-card border border-white/10 hover:border-white/30 text-on-surface-variant hover:text-white font-mono text-xs flex items-center gap-1 transition-all" title="Reset">
+                    <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+                  </button>
+                </div>
+
+                <!-- Viva Explainer Box -->
+                <div class="p-3 rounded-lg bg-surface-low border border-white/5 text-[11px] font-mono text-on-surface-variant leading-relaxed">
+                  <span class="text-emerald-400 font-bold">💡 Viva Insight:</span> Gauss-Seidel immediately feeds freshly computed values x_i^(k+1) into subsequent coordinate updates, effectively squaring the iteration matrix's spectral radius: ρ(T_GS) ≈ ρ(T_J)².
+                </div>
+              </div>
+            </div>
+
+            <!-- Iteration Table -->
+            <div class="overflow-x-auto max-h-72 overflow-y-auto rounded-xl border border-white/10 bg-surface-dim">
+              <table class="w-full text-left font-mono text-xs">
+                <thead class="sticky top-0 bg-surface-low border-b border-white/10 text-[10px] text-on-surface-variant select-none">
+                  <tr>
+                    <th class="py-2.5 px-3">ITER</th>
+                    <th class="py-2.5 px-3">JACOBI x^(k)</th>
+                    <th class="py-2.5 px-3">JACOBI ERROR</th>
+                    <th class="py-2.5 px-3">GAUSS-SEIDEL x^(k)</th>
+                    <th class="py-2.5 px-3">GAUSS-SEIDEL ERROR</th>
+                  </tr>
+                </thead>
+                <tbody id="academicLinearTable"></tbody>
+              </table>
+            </div>
+
+            <div id="academicLinearSummary" class="text-xs font-mono text-emerald-400 p-3 rounded-lg bg-emerald-950/20 border border-emerald-500/30 flex items-center gap-2">
+              <span class="material-symbols-outlined text-[16px]">verified</span>
+              <span>Select a preset and click 'Run Solver' to observe step-by-step convergence.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Bisection Root Optimizer -->
+        <div id="academic-bisection" class="academic-tab-content hidden flex flex-col gap-6">
+          <div class="p-6 rounded-2xl bg-surface-card border border-white/10 shadow-xl flex flex-col gap-5">
+            <!-- Header & Presets -->
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div>
+                <h3 class="font-heading font-bold text-lg text-white flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary text-[20px]">center_focus_strong</span>
+                  <span>Bisection Method Root Optimization</span>
+                </h3>
+                <p class="text-xs text-on-surface-variant mt-0.5" id="bisectionPresetDesc">
+                  Continuous function bracket shrinking f(a)·f(b) ≤ 0 guaranteed by Intermediate Value Theorem.
+                </p>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <select id="bisectionFuncSelect" class="bg-surface-low border border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-primary">
+                  <option value="cube1">f(x) = x³ - 4x - 9 (Cubic)</option>
+                  <option value="cube2">f(x) = x³ - x - 2</option>
+                  <option value="trig">f(x) = cos(x) - x (Transcendental)</option>
+                  <option value="thermal">f(T) = T⁴ - 2.5×10⁷ (Radiation)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Interactive Bracket Controls -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+              <!-- Left: Canvas Graph with Brackets -->
+              <div class="lg:col-span-7 flex flex-col gap-2 p-4 rounded-xl bg-surface-dim border border-white/5">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-mono text-on-surface-variant flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[14px] text-primary">analytics</span>
+                    <span>FUNCTION CURVE & BRACKET SHRINKAGE [a_k, b_k]</span>
+                  </span>
+                  <div class="flex items-center gap-3 text-[11px] font-mono">
+                    <span class="text-cyan-400">● f(x)</span>
+                    <span class="text-red-400">| a_k</span>
+                    <span class="text-blue-400">| b_k</span>
+                    <span class="text-amber-400">| Midpoint c_k</span>
+                  </div>
+                </div>
+                <div class="relative w-full h-48 bg-surface-low rounded-lg overflow-hidden border border-white/5">
+                  <canvas id="academicBisectionCanvas" class="w-full h-full block"></canvas>
+                </div>
+              </div>
+
+              <!-- Right: Controls & Bracket Validation -->
+              <div class="lg:col-span-5 flex flex-col justify-between gap-3 p-4 rounded-xl bg-surface-dim border border-white/5">
+                <div class="flex flex-col gap-3">
+                  <span class="text-xs font-mono text-on-surface-variant uppercase tracking-wider">INTERVAL CONFIGURATION</span>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label class="text-[11px] font-mono text-on-surface-variant">Lower Bracket (a):</label>
+                      <input type="number" id="bisInputA" value="2.0" step="0.1" class="w-full mt-1 bg-surface-card border border-white/10 rounded-lg px-2.5 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-primary"/>
+                    </div>
+                    <div>
+                      <label class="text-[11px] font-mono text-on-surface-variant">Upper Bracket (b):</label>
+                      <input type="number" id="bisInputB" value="3.0" step="0.1" class="w-full mt-1 bg-surface-card border border-white/10 rounded-lg px-2.5 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-primary"/>
+                    </div>
+                  </div>
+                  <div id="bisBracketStatus" class="p-2 rounded-lg bg-surface-card border border-white/10 text-[11px] font-mono flex items-center gap-2 text-emerald-400">
+                    <span class="material-symbols-outlined text-[15px]">check_circle</span>
+                    <span>Valid bracket: f(a) and f(b) have opposite signs.</span>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2 pt-2 border-t border-white/5">
+                  <button id="runAcademicBisectionBtn" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-secondary-container to-primary text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg active:scale-95 transition-all">
+                    <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+                    <span>Run Bisection Animated</span>
+                  </button>
+                  <button id="stepAcademicBisectionBtn" class="px-3 py-2.5 rounded-xl bg-surface-card border border-white/10 hover:border-primary text-white font-mono text-xs flex items-center gap-1 transition-all" title="Step one iteration">
+                    <span class="material-symbols-outlined text-[16px]">skip_next</span>
+                    <span>Step</span>
+                  </button>
+                  <button id="resetAcademicBisectionBtn" class="px-3 py-2.5 rounded-xl bg-surface-card border border-white/10 hover:border-white/30 text-on-surface-variant hover:text-white font-mono text-xs flex items-center gap-1 transition-all" title="Reset">
+                    <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+                  </button>
+                </div>
+
+                <div class="p-3 rounded-lg bg-surface-low border border-white/5 text-[11px] font-mono text-on-surface-variant leading-relaxed">
+                  <span class="text-primary font-bold">💡 Viva Insight:</span> The Bisection method has guaranteed linear convergence with an asymptotic error constant of C = 0.5: ε_(k+1) = 0.5 * ε_k. Iteration count required for tolerance ε is exactly k ≥ ⌈log₂((b-a)/ε)⌉.
+                </div>
+              </div>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto max-h-72 overflow-y-auto rounded-xl border border-white/10 bg-surface-dim">
+              <table class="w-full text-left font-mono text-xs">
+                <thead class="sticky top-0 bg-surface-low border-b border-white/10 text-[10px] text-on-surface-variant select-none">
+                  <tr>
+                    <th class="py-2.5 px-3">STEP k</th>
+                    <th class="py-2.5 px-3">a_k</th>
+                    <th class="py-2.5 px-3">b_k</th>
+                    <th class="py-2.5 px-3">MIDPOINT c_k</th>
+                    <th class="py-2.5 px-3">f(c_k)</th>
+                    <th class="py-2.5 px-3">ERROR (b-a)/2</th>
+                    <th class="py-2.5 px-3">SUB-INTERVAL KEPT</th>
+                  </tr>
+                </thead>
+                <tbody id="academicBisectionTable"></tbody>
+              </table>
+            </div>
+
+            <div id="academicBisectionRoot" class="text-xs font-mono text-primary p-3 rounded-lg bg-surface-dim border border-white/10 flex items-center gap-2">
+              <span class="material-symbols-outlined text-[16px]">flag</span>
+              <span>Root calculation ready. Click 'Run Bisection Animated' to start.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Newton-Raphson -->
+        <div id="academic-newton" class="academic-tab-content hidden flex flex-col gap-6">
+          <div class="p-6 rounded-2xl bg-surface-card border border-white/10 shadow-xl flex flex-col gap-5">
+            <!-- Header & Presets -->
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div>
+                <h3 class="font-heading font-bold text-lg text-white flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary text-[20px]">trending_up</span>
+                  <span>Newton-Raphson Nonlinear Tangent Solver</span>
+                </h3>
+                <p class="text-xs text-on-surface-variant mt-0.5" id="newtonPresetDesc">
+                  Quadratic convergence rate (doubling significant digits each iteration) via x_(k+1) = x_k - f(x_k)/f'(x_k).
+                </p>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <select id="newtonFuncSelect" class="bg-surface-low border border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-primary">
+                  <option value="cube1">f(x) = x³ - 2x - 5</option>
+                  <option value="sqrt7">f(x) = x² - 7 (Square Root √7)</option>
+                  <option value="kepler">f(x) = x - 0.5·sin(x) - 0.8 (Kepler)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Controls & Tangent Canvas -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+              <!-- Left: Canvas Tangent Lines -->
+              <div class="lg:col-span-7 flex flex-col gap-2 p-4 rounded-xl bg-surface-dim border border-white/5">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-mono text-on-surface-variant flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[14px] text-primary">timeline</span>
+                    <span>TANGENT LINE PROJECTIONS (x_k &rarr; x_(k+1))</span>
+                  </span>
+                  <div class="flex items-center gap-3 text-[11px] font-mono">
+                    <span class="text-cyan-400">● f(x)</span>
+                    <span class="text-amber-400">-- Tangent</span>
+                    <span class="text-emerald-400">● Root x*</span>
+                  </div>
+                </div>
+                <div class="relative w-full h-48 bg-surface-low rounded-lg overflow-hidden border border-white/5">
+                  <canvas id="academicNewtonCanvas" class="w-full h-full block"></canvas>
+                </div>
+              </div>
+
+              <!-- Right: Initial Guess & Actions -->
+              <div class="lg:col-span-5 flex flex-col justify-between gap-3 p-4 rounded-xl bg-surface-dim border border-white/5">
+                <div class="flex flex-col gap-3">
+                  <span class="text-xs font-mono text-on-surface-variant uppercase tracking-wider">SOLVER PARAMETERS</span>
+                  <div>
+                    <label class="text-[11px] font-mono text-on-surface-variant">Initial Guess (x₀):</label>
+                    <input type="number" id="newtonInputX0" step="0.1" value="2.0" class="w-full mt-1 bg-surface-card border border-white/10 rounded-lg px-2.5 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-primary"/>
+                  </div>
+                  <div id="newtonFormulaBox" class="p-2.5 rounded-lg bg-surface-card border border-white/10 font-mono text-xs text-amber-300">
+                    x_(k+1) = x_k - (x_k³ - 2x_k - 5) / (3x_k² - 2)
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2 pt-2 border-t border-white/5">
+                  <button id="runAcademicNewtonBtn" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-secondary-container to-primary text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg active:scale-95 transition-all">
+                    <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+                    <span>Run Newton Animated</span>
+                  </button>
+                  <button id="stepAcademicNewtonBtn" class="px-3 py-2.5 rounded-xl bg-surface-card border border-white/10 hover:border-primary text-white font-mono text-xs flex items-center gap-1 transition-all" title="Step one iteration">
+                    <span class="material-symbols-outlined text-[16px]">skip_next</span>
+                    <span>Step</span>
+                  </button>
+                  <button id="resetAcademicNewtonBtn" class="px-3 py-2.5 rounded-xl bg-surface-card border border-white/10 hover:border-white/30 text-on-surface-variant hover:text-white font-mono text-xs flex items-center gap-1 transition-all" title="Reset">
+                    <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+                  </button>
+                </div>
+
+                <div class="p-3 rounded-lg bg-surface-low border border-white/5 text-[11px] font-mono text-on-surface-variant leading-relaxed">
+                  <span class="text-emerald-400 font-bold">💡 Viva Insight:</span> Newton-Raphson has quadratic convergence: |e_(k+1)| ≈ (f''(x*)/(2f'(x*))) * |e_k|². Notice how error goes from 10⁻¹ &rarr; 10⁻² &rarr; 10⁻⁴ &rarr; 10⁻⁸ in just 4 steps!
+                </div>
+              </div>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto max-h-72 overflow-y-auto rounded-xl border border-white/10 bg-surface-dim">
+              <table class="w-full text-left font-mono text-xs">
+                <thead class="sticky top-0 bg-surface-low border-b border-white/10 text-[10px] text-on-surface-variant select-none">
+                  <tr>
+                    <th class="py-2.5 px-3">ITER k</th>
+                    <th class="py-2.5 px-3">x_k</th>
+                    <th class="py-2.5 px-3">f(x_k)</th>
+                    <th class="py-2.5 px-3">f'(x_k)</th>
+                    <th class="py-2.5 px-3">x_(k+1)</th>
+                    <th class="py-2.5 px-3">ERROR |x_(k+1) - x_k|</th>
+                  </tr>
+                </thead>
+                <tbody id="academicNewtonTable"></tbody>
+              </table>
+            </div>
+
+            <div id="academicNewtonRoot" class="text-xs font-mono text-emerald-400 p-3 rounded-lg bg-emerald-950/20 border border-emerald-500/30 flex items-center gap-2">
+              <span class="material-symbols-outlined text-[16px]">verified</span>
+              <span>Root calculation ready. Click 'Run Newton Animated' to start.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 4: Power Method Eigenvalues -->
+        <div id="academic-power" class="academic-tab-content hidden flex flex-col gap-6">
+          <div class="p-6 rounded-2xl bg-surface-card border border-white/10 shadow-xl flex flex-col gap-5">
+            <!-- Header & Presets -->
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div>
+                <h3 class="font-heading font-bold text-lg text-white flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary text-[20px]">donut_large</span>
+                  <span>Power Iteration: Dominant Eigenvalue &amp; Eigenvector</span>
+                </h3>
+                <p class="text-xs text-on-surface-variant mt-0.5" id="powerPresetDesc">
+                  Repeated matrix multiplication y = A·v converges to the principal eigenspace corresponding to max |λ_i|.
+                </p>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <select id="powerPresetSelect" class="bg-surface-low border border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-primary">
+                  <option value="symmetric">Preset 1: 3x3 Real Symmetric Matrix</option>
+                  <option value="pagerank">Preset 2: 3x3 Stochastic Transition Matrix</option>
+                  <option value="dominant">Preset 3: 3x3 Strongly Dominant Matrix</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Controls & Rayleigh Canvas -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+              <!-- Left: Canvas Rayleigh Quotient Curve -->
+              <div class="lg:col-span-7 flex flex-col gap-2 p-4 rounded-xl bg-surface-dim border border-white/5">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-mono text-on-surface-variant flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[14px] text-primary">ssid_chart</span>
+                    <span>RAYLEIGH QUOTIENT λ^(k) &amp; EIGENVECTOR COMPONENTS</span>
+                  </span>
+                  <div class="flex items-center gap-3 text-[11px] font-mono">
+                    <span class="text-primary font-bold">λ^(k) Rayleigh</span>
+                    <span class="text-emerald-400 font-bold">v^(k) Components</span>
+                  </div>
+                </div>
+                <div class="relative w-full h-48 bg-surface-low rounded-lg overflow-hidden border border-white/5">
+                  <canvas id="academicPowerCanvas" class="w-full h-full block"></canvas>
+                </div>
+              </div>
+
+              <!-- Right: Actions & Viva Insight -->
+              <div class="lg:col-span-5 flex flex-col justify-between gap-3 p-4 rounded-xl bg-surface-dim border border-white/5">
+                <div class="flex flex-col gap-3">
+                  <span class="text-xs font-mono text-on-surface-variant uppercase tracking-wider">COMPUTATION TELEMETRY</span>
+                  <div id="powerMatrixStrip" class="p-2.5 rounded-lg bg-surface-card border border-white/10 font-mono text-xs text-cyan-300">
+                    A = [ [4, 1, 1], [1, 3, 0], [1, 0, 2] ]
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2 pt-2 border-t border-white/5">
+                  <button id="runAcademicPowerBtn" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-secondary-container to-primary text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg active:scale-95 transition-all">
+                    <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+                    <span>Compute Dominant λ₁</span>
+                  </button>
+                  <button id="stepAcademicPowerBtn" class="px-3 py-2.5 rounded-xl bg-surface-card border border-white/10 hover:border-primary text-white font-mono text-xs flex items-center gap-1 transition-all" title="Step one iteration">
+                    <span class="material-symbols-outlined text-[16px]">skip_next</span>
+                    <span>Step</span>
+                  </button>
+                  <button id="resetAcademicPowerBtn" class="px-3 py-2.5 rounded-xl bg-surface-card border border-white/10 hover:border-white/30 text-on-surface-variant hover:text-white font-mono text-xs flex items-center gap-1 transition-all" title="Reset">
+                    <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+                  </button>
+                </div>
+
+                <div class="p-3 rounded-lg bg-surface-low border border-white/5 text-[11px] font-mono text-on-surface-variant leading-relaxed">
+                  <span class="text-primary font-bold">💡 Viva Insight:</span> Convergence rate is governed strictly by the spectral ratio |λ₂ / λ₁|. In LINKRANK, this exact algorithm computes stationary web ranking vector v where λ₁ = 1.000 (Perron-Frobenius theorem).
+                </div>
+              </div>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto max-h-72 overflow-y-auto rounded-xl border border-white/10 bg-surface-dim">
+              <table class="w-full text-left font-mono text-xs">
+                <thead class="sticky top-0 bg-surface-low border-b border-white/10 text-[10px] text-on-surface-variant select-none">
+                  <tr>
+                    <th class="py-2.5 px-3">ITER k</th>
+                    <th class="py-2.5 px-3">RAYLEIGH QUOTIENT λ^(k)</th>
+                    <th class="py-2.5 px-3">NORMALIZED EIGENVECTOR v^(k)</th>
+                    <th class="py-2.5 px-3">ERROR ||v^(k) - v^(k-1)||</th>
+                  </tr>
+                </thead>
+                <tbody id="academicPowerTable"></tbody>
+              </table>
+            </div>
+
+            <div id="academicPowerEigen" class="text-xs font-mono text-primary p-3 rounded-lg bg-surface-dim border border-white/10 flex items-center gap-2">
+              <span class="material-symbols-outlined text-[16px]">verified</span>
+              <span>Power iteration ready. Click 'Compute Dominant λ₁' to run.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================= -->
+  <!-- MODALS (SHOW THE MATH, COMPARE, BISECTION, WHAT-IF) -->
+  <!-- ========================================================= -->
+
+  <!-- Modal 1: Thermal "Show the Math" -->
+  <div id="thermalMathModal" class="modal-container hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="relative w-full max-w-2xl rounded-2xl bg-surface-card border border-white/10 p-6 sm:p-8 flex flex-col gap-5 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-white/10 pb-4">
+        <h3 class="font-heading font-bold text-xl text-white flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-[20px]">functions</span>
+          <span>THERMALX — Mathematical Formulation</span>
+        </h3>
+        <button class="close-modal-btn text-on-surface-variant hover:text-white">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="flex flex-col gap-4 text-xs font-mono text-on-surface-variant leading-relaxed overflow-y-auto max-h-[70vh] pr-2">
+        <div class="p-4 rounded-xl bg-surface-dim border border-white/5 text-white">
+          <div class="text-primary font-bold mb-1">1. Governing 2D Heat Diffusion Equation:</div>
+          <p>k &nabla;&sup2; T + Q(x,y) - h_conv (T - T_amb) = 0</p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-surface-dim border border-white/5 text-white">
+          <div class="text-cyan-300 font-bold mb-1">2. 5-Point Finite Difference Stencil:</div>
+          <p>T_(i,j)^(k+1) = [ T_(i+1,j) + T_(i-1,j) + T_(i,j+1) + T_(i,j-1) + (h&sup2;/k)*Q_(i,j) + H*T_amb ] / (4 + H)</p>
+          <p class="mt-2 text-[11px] text-on-surface-variant">Where H = h_conv * h&sup2; / k represents dimensionless cooling convection.</p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-surface-dim border border-white/5 text-white">
+          <div class="text-tertiary-hot font-bold mb-1">3. Jacobi vs Gauss-Seidel:</div>
+          <p><strong>Jacobi:</strong> Calculates T^(k+1) exclusively from the previous grid T^k without reusing newly calculated values.</p>
+          <p class="mt-1"><strong>Gauss-Seidel:</strong> Reuses T_(i-1,j)^(k+1) and T_(i,j-1)^(k+1) immediately in the current iteration scan, accelerating convergence roughly by a factor of 2.</p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-surface-dim border border-white/5 text-white">
+          <div class="text-emerald-400 font-bold mb-1">4. Convergence Stopping Criterion:</div>
+          <p>L_&infin; Error = max | T_(i,j)^(k+1) - T_(i,j)^(k) | &le; Tolerance (0.001)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Compare Solvers (Jacobi vs Gauss-Seidel) -->
+  <div id="compareSolversModal" class="modal-container hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="relative w-full max-w-3xl rounded-2xl bg-surface-card border border-white/10 p-6 sm:p-8 flex flex-col gap-6 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-white/10 pb-4">
+        <div>
+          <h3 class="font-heading font-bold text-xl text-white">Solver Benchmark: Jacobi vs Gauss-Seidel</h3>
+          <p class="text-xs text-on-surface-variant mt-0.5">Computed on identical thermal grid boundary conditions.</p>
+        </div>
+        <button class="close-modal-btn text-on-surface-variant hover:text-white">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <!-- Comparison Metrics Cards -->
+      <div class="grid grid-cols-2 gap-4">
+        <!-- Jacobi Card -->
+        <div class="p-4 rounded-xl bg-surface-dim border border-cyan-500/30 flex flex-col gap-2">
+          <div class="flex items-center justify-between">
+            <span class="font-heading font-bold text-sm text-cyan-300">Jacobi Iteration</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300">SIMULTANEOUS</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2 font-mono text-xs mt-2">
+            <div>
+              <span class="text-on-surface-variant text-[10px]">ITERATIONS</span>
+              <div id="compareJacobiIter" class="font-bold text-white text-base">45</div>
+            </div>
+            <div>
+              <span class="text-on-surface-variant text-[10px]">FINAL ERROR</span>
+              <div id="compareJacobiError" class="font-bold text-cyan-300">0.0012</div>
+            </div>
+            <div>
+              <span class="text-on-surface-variant text-[10px]">RUNTIME</span>
+              <div id="compareJacobiTime" class="font-bold text-white">12.4 ms</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gauss-Seidel Card -->
+        <div class="p-4 rounded-xl bg-surface-dim border border-tertiary-hot/40 flex flex-col gap-2">
+          <div class="flex items-center justify-between">
+            <span class="font-heading font-bold text-sm text-tertiary-hot">Gauss-Seidel Method</span>
+            <span id="compareSpeedup" class="text-[10px] font-mono px-2 py-0.5 rounded bg-red-500/20 text-red-300 font-bold">2.1x FASTER</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2 font-mono text-xs mt-2">
+            <div>
+              <span class="text-on-surface-variant text-[10px]">ITERATIONS</span>
+              <div id="compareGSIter" class="font-bold text-white text-base">21</div>
+            </div>
+            <div>
+              <span class="text-on-surface-variant text-[10px]">FINAL ERROR</span>
+              <div id="compareGSError" class="font-bold text-tertiary-hot">0.0008</div>
+            </div>
+            <div>
+              <span class="text-on-surface-variant text-[10px]">RUNTIME</span>
+              <div id="compareGSTime" class="font-bold text-white">5.8 ms</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real Convergence Graph Canvas -->
+      <div class="flex flex-col gap-2">
+        <span class="text-xs font-mono text-on-surface-variant">CONVERGENCE CURVE: Log10(Error) vs Iterations</span>
+        <canvas id="compareGraphCanvas" width="680" height="200" class="w-full h-auto rounded-xl bg-surface-dim border border-white/5 block"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Optimize Cooling via Bisection -->
+  <div id="bisectionOptimizerModal" class="modal-container hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="relative w-full max-w-3xl rounded-2xl bg-surface-card border border-white/10 p-6 sm:p-8 flex flex-col gap-5 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-white/10 pb-4">
+        <div>
+          <h3 class="font-heading font-bold text-xl text-white">Bisection Thermal Optimization</h3>
+          <p class="text-xs text-on-surface-variant mt-0.5">Finding minimal cooling intensity such that T_max &le; 75.0°C.</p>
+        </div>
+        <button class="close-modal-btn text-on-surface-variant hover:text-white">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-3 gap-4">
+        <div class="p-4 rounded-xl bg-surface-dim border border-white/5">
+          <span class="text-[10px] font-mono text-on-surface-variant uppercase">OPTIMAL COOLING</span>
+          <div id="bisectionOptimalPct" class="font-heading font-extrabold text-2xl text-primary mt-1">47%</div>
+        </div>
+        <div class="p-4 rounded-xl bg-surface-dim border border-white/5">
+          <span class="text-[10px] font-mono text-on-surface-variant uppercase">RESULTING T_MAX</span>
+          <div id="bisectionAchievedTemp" class="font-heading font-extrabold text-2xl text-emerald-400 mt-1">74.6°C</div>
+        </div>
+        <div class="p-4 rounded-xl bg-surface-dim border border-white/5">
+          <span class="text-[10px] font-mono text-on-surface-variant uppercase">BISECTION ITERATIONS</span>
+          <div id="bisectionStepsCount" class="font-heading font-extrabold text-2xl text-white mt-1">7 Steps</div>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto max-h-56 pr-2">
+        <table class="w-full text-left font-mono text-xs">
+          <thead>
+            <tr class="border-b border-white/10 text-[10px] text-on-surface-variant">
+              <th class="py-2 px-3">STEP</th>
+              <th class="py-2 px-3">LOWER a</th>
+              <th class="py-2 px-3">UPPER b</th>
+              <th class="py-2 px-3">TESTED MIDPOINT</th>
+              <th class="py-2 px-3">COMPUTED T_MAX</th>
+              <th class="py-2 px-3">TARGET STATUS</th>
+            </tr>
+          </thead>
+          <tbody id="bisectionStepsTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: LinkRank "Show the Math" -->
+  <div id="linkrankMathModal" class="modal-container hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="relative w-full max-w-2xl rounded-2xl bg-surface-card border border-white/10 p-6 sm:p-8 flex flex-col gap-5 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-white/10 pb-4">
+        <h3 class="font-heading font-bold text-xl text-white flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-[20px]">schema</span>
+          <span>LINKRANK — Mathematical Chain</span>
+        </h3>
+        <button class="close-modal-btn text-on-surface-variant hover:text-white">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="flex flex-col gap-4 text-xs font-mono text-on-surface-variant leading-relaxed overflow-y-auto max-h-[70vh] pr-2">
+        <div class="p-4 rounded-xl bg-surface-dim border border-white/5 text-white">
+          <div class="text-primary font-bold mb-1">1. Adjacency Matrix A:</div>
+          <p>A_(j,i) = 1 if a directed link exists from node i &rarr; node j, otherwise 0.</p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-surface-dim border border-white/5 text-white">
+          <div class="text-cyan-300 font-bold mb-1">2. Column-Stochastic Transition Matrix M:</div>
+          <p>M_(j,i) = A_(j,i) / OutDegree(i), ensuring each column sums to 1.0 (conserving probability mass).</p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-surface-dim border border-white/5 text-white">
+          <div class="text-secondary font-bold mb-1">3. Google Matrix with Damping (d = 0.85):</div>
+          <p>G = d * M + (1 - d) / N * J_(N&times;N)</p>
+          <p class="mt-1 text-[11px] text-on-surface-variant">Guarantees primitivity and positive column sum via the Perron-Frobenius Theorem.</p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-surface-dim border border-white/5 text-white">
+          <div class="text-emerald-400 font-bold mb-1">4. Dominant Eigenvector Power Iteration:</div>
+          <p>v^(k+1) = G * v^k, converging to the stationary distribution where &lambda;₁ = 1.000.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 5: LinkRank "What If?" Live Topology Comparison -->
+  <div id="whatIfModal" class="modal-container hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="relative w-full max-w-2xl rounded-2xl bg-surface-card border border-white/10 p-6 sm:p-8 flex flex-col gap-5 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-white/10 pb-4">
+        <div>
+          <h3 class="font-heading font-bold text-xl text-white">What-If? Live Topology Perturbation</h3>
+          <p class="text-xs text-on-surface-variant mt-0.5">Test how structural alterations change importance rankings.</p>
+        </div>
+        <button class="close-modal-btn text-on-surface-variant hover:text-white">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="grid grid-cols-2 gap-3">
+        <button id="whatIfBoostBtn" class="p-3 rounded-xl bg-surface-dim border border-emerald-500/40 hover:border-emerald-400 text-left transition-all">
+          <div class="text-xs font-heading font-bold text-emerald-300">Boost Challenger</div>
+          <div class="text-[10px] font-mono text-on-surface-variant mt-0.5">Redirect links to <span id="whatIfChallengerName">Node</span></div>
+        </button>
+        <button id="whatIfSeverBtn" class="p-3 rounded-xl bg-surface-dim border border-red-500/40 hover:border-red-400 text-left transition-all">
+          <div class="text-xs font-heading font-bold text-red-300">Dethrone Leader</div>
+          <div class="text-[10px] font-mono text-on-surface-variant mt-0.5">Sever incoming links to <span id="whatIfLeaderName">Leader</span></div>
+        </button>
+      </div>
+
+      <!-- Dynamic Movement Delta List -->
+      <div class="flex flex-col gap-2">
+        <span class="text-xs font-mono text-on-surface-variant">BEFORE &rarr; AFTER RANK MOVEMENTS</span>
+        <div id="whatIfDeltaList" class="flex flex-col gap-2 max-h-60 overflow-y-auto pr-2">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPLICATION SCRIPT MODULE -->
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
